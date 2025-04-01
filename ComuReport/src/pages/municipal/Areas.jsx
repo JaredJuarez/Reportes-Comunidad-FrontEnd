@@ -23,7 +23,7 @@ const Areas = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/area/`, {
+      const response = await fetch(`${API_BASE_URL}/api/area`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -90,18 +90,18 @@ const Areas = () => {
     setModalOpen(true);
   };
 
-   const handleModalSubmit = async (formData) => {
+  const handleModalSubmit = async (formData) => {
     const token = localStorage.getItem('token'); // Obtiene el token del localStorage
-  
+
     if (!token) {
       console.error('No se encontró un token en localStorage.');
       return;
     }
-  
+
     try {
       if (modalTitle === 'Crear Nueva Área') {
         // Realiza el POST para crear una nueva área
-        const response = await fetch(`${API_BASE_URL}/api/area/`, {
+        const response = await fetch(`${API_BASE_URL}/api/area`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -116,14 +116,14 @@ const Areas = () => {
             password: formData.password,
           }),
         });
-  
+
         if (!response.ok) {
           throw new Error('Error al crear el área. Verifica los datos enviados.');
         }
-  
+
         // Maneja la respuesta como texto si no es JSON
         const result = await response.text();
-  
+
         // Actualiza el estado con la nueva área (opcional, si el servidor no devuelve el área creada)
         setData((prevData) => [
           ...prevData,
@@ -136,22 +136,53 @@ const Areas = () => {
             phone: formData.phone,
           },
         ]);
-  
+
         // Muestra el mensaje de éxito
         setSuccessMessage('Área agregada correctamente.');
         setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
       }
-  
+
       setModalOpen(false); // Cierra el modal
     } catch (error) {
       console.error('Error al crear o actualizar el área:', error.message);
     }
   };
 
-  const handleConfirmDelete = () => {
-    setData(data.filter((a) => a.id !== rowToDelete.id));
-    setConfirmAlertOpen(false);
-    setRowToDelete(null);
+  const handleConfirmDelete = async () => {
+    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+
+    if (!token) {
+      console.error('No se encontró un token en localStorage.');
+      return;
+    }
+
+    try {
+      // Realiza el DELETE para eliminar el área
+      const response = await fetch(`${API_BASE_URL}/api/area`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+        },
+        body: JSON.stringify({ uuid: rowToDelete.id }), // Envía el UUID en el cuerpo
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el área. Verifica tu conexión o el token.');
+      }
+
+      // Actualiza el estado eliminando el área de la lista
+      setData((prevData) => prevData.filter((area) => area.id !== rowToDelete.id));
+
+      // Muestra un mensaje de éxito
+      setSuccessMessage('Área eliminada correctamente.');
+      setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+
+      setConfirmAlertOpen(false); // Cierra el modal de confirmación
+      setRowToDelete(null); // Limpia la fila seleccionada
+    } catch (error) {
+      console.error('Error al eliminar el área:', error.message);
+    }
   };
 
   const handleCancelDelete = () => {

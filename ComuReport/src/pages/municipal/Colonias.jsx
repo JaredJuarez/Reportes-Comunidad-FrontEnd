@@ -3,50 +3,85 @@ import Table from '../../components/Table';
 import ButtonRegister from '../../components/ButtonRegister';
 import ModalForm from '../../components/ModalForm';
 import ConfirmAlert from '../../components/ConfirmAlert';
-
-const municipalities = [
-  { id: 1, name: 'Cuernavaca', state: 'Morelos' },
-  { id: 2, name: 'Jiutepec', state: 'Morelos' },
-  { id: 3, name: 'Temixco', state: 'Morelos' }
-];
-
-let coloniasList = [
-  { id: 1, municipioId: 1, municipio: 'Cuernavaca', colonia: 'San Miguel', nombre: 'Juan', apellido: 'Hernández', correo: 'juan@example.com', telefono: '555-1234' },
-  { id: 2, municipioId: 1, municipio: 'Cuernavaca', colonia: 'Chamilpa', nombre: 'María', apellido: 'López', correo: 'maria@example.com', telefono: '555-5678' },
-  { id: 3, municipioId: 2, municipio: 'Jiutepec', colonia: 'Centro', nombre: 'Carlos', apellido: 'Sánchez', correo: 'carlos@example.com', telefono: '555-8765' }
-];
+import API_BASE_URL from '../../api_config';
 
 const Colonias = () => {
-  const [selectedMunicipioId, setSelectedMunicipioId] = useState(municipalities[0].id);
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalInitialData, setModalInitialData] = useState(null);
   const [confirmAlertOpen, setConfirmAlertOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Función para obtener las colonias desde la API
+  const fetchColonias = async () => {
+    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+
+    if (!token) {
+      console.error('No se encontró un token en localStorage.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/colony`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener las colonias. Verifica tu conexión o el token.');
+      }
+
+      const colonias = await response.json();
+
+      // Mapea los datos para adaptarlos al formato esperado por la tabla
+      const formattedData = colonias.map((colonia) => ({
+        id: colonia.uuid,
+        colonia: colonia.nameColony,
+        nombre: colonia.personBean.name,
+        apellido: colonia.personBean.lastname,
+        correo: colonia.personBean.email,
+        telefono: colonia.personBean.phone,
+      }));
+
+      setData(formattedData);
+    } catch (error) {
+      console.error('Error al obtener las colonias:', error.message);
+    }
+  };
 
   useEffect(() => {
-    const filtered = coloniasList.filter(item => item.municipioId === selectedMunicipioId);
-    setData(filtered);
-  }, [selectedMunicipioId]);
+    fetchColonias(); // Llama a la función para obtener las colonias al cargar el componente
+  }, []);
 
   const columns = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'Municipio', accessor: 'municipio' },
     { header: 'Colonia', accessor: 'colonia' },
     { header: 'Nombre', accessor: 'nombre' },
     { header: 'Apellido', accessor: 'apellido' },
     { header: 'Correo', accessor: 'correo' },
-    { header: 'Teléfono', accessor: 'telefono' }
+    { header: 'Teléfono', accessor: 'telefono' },
   ];
 
-  const handleMunicipioChange = (e) => {
-    const newId = Number(e.target.value);
-    setSelectedMunicipioId(newId);
+  const handleCreate = () => {
+    setModalTitle('Crear Nueva Colonia');
+    setModalInitialData({
+      id: '',
+      colonia: '',
+      nombre: '',
+      apellido: '',
+      correo: '',
+      telefono: '',
+      password: '',
+    });
+    setModalOpen(true);
   };
 
   const handleEdit = (row) => {
-    setModalTitle('Editar Enlace de Colonia');
+    setModalTitle('Editar Colonia');
     setModalInitialData(row);
     setModalOpen(true);
   };
@@ -56,40 +91,126 @@ const Colonias = () => {
     setConfirmAlertOpen(true);
   };
 
-  const handleCreate = () => {
-    const municipioObj = municipalities.find(m => m.id === selectedMunicipioId);
-    setModalTitle('Crear Nuevo Enlace de Colonia');
-    setModalInitialData({
-      id: '',
-      municipioId: municipioObj.id,
-      municipio: municipioObj.name,
-      colonia: '',
-      nombre: '',
-      apellido: '',
-      correo: '',
-      telefono: ''
-    });
-    setModalOpen(true);
-  };
+  const handleModalSubmit = async (formData) => {
+    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
 
-  const handleModalSubmit = (formData) => {
-    if (modalTitle === 'Crear Nuevo Enlace de Colonia') {
-      const newId = coloniasList.length ? Math.max(...coloniasList.map(item => item.id)) + 1 : 1;
-      const newItem = { ...formData, id: newId };
-      coloniasList = [...coloniasList, newItem];
-      setData(coloniasList.filter(item => item.municipioId === selectedMunicipioId));
-    } else {
-      coloniasList = coloniasList.map(item => (item.id === formData.id ? formData : item));
-      setData(coloniasList.filter(item => item.municipioId === selectedMunicipioId));
+    if (!token) {
+      console.error('No se encontró un token en localStorage.');
+      return;
     }
-    setModalOpen(false);
+
+    try {
+      if (modalTitle === 'Crear Nueva Colonia') {
+        // Realiza el POST para crear una nueva colonia
+        const response = await fetch(`${API_BASE_URL}/api/colony`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+          },
+          body: JSON.stringify({
+            colonyName: formData.colonia,
+            name: formData.nombre,
+            lastname: formData.apellido,
+            email: formData.correo,
+            phone: formData.telefono,
+            password: formData.password,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al crear la colonia. Verifica los datos enviados.');
+        }
+
+        // Maneja la respuesta como texto si no es JSON
+        const result = await response.text();
+        console.log('Respuesta del servidor:', result);
+
+        // Actualiza el estado con los datos enviados (si el servidor no devuelve la colonia creada)
+        setData((prevData) => [
+          ...prevData,
+          {
+            id: Date.now(), // Genera un ID temporal
+            colonia: formData.colonia,
+            nombre: formData.nombre,
+            apellido: formData.apellido,
+            correo: formData.correo,
+            telefono: formData.telefono,
+          },
+        ]);
+
+        setSuccessMessage('Colonia agregada correctamente.');
+        setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+      } else if (modalTitle === 'Editar Colonia') {
+        // Realiza el PUT para actualizar una colonia existente
+        const response = await fetch(`${API_BASE_URL}/api/colony/${formData.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+          },
+          body: JSON.stringify({
+            colonyName: formData.colonia,
+            name: formData.nombre,
+            lastname: formData.apellido,
+            email: formData.correo,
+            phone: formData.telefono,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar la colonia. Verifica los datos enviados.');
+        }
+
+        // Actualiza el estado con los datos editados
+        setData((prevData) =>
+          prevData.map((item) => (item.id === formData.id ? formData : item))
+        );
+
+        setSuccessMessage('Colonia actualizada correctamente.');
+        setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+      }
+
+      setModalOpen(false); // Cierra el modal
+    } catch (error) {
+      console.error('Error al crear o actualizar la colonia:', error.message);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    coloniasList = coloniasList.filter(item => item.id !== rowToDelete.id);
-    setData(coloniasList.filter(item => item.municipioId === selectedMunicipioId));
-    setConfirmAlertOpen(false);
-    setRowToDelete(null);
+  const handleConfirmDelete = async () => {
+    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+
+    if (!token) {
+      console.error('No se encontró un token en localStorage.');
+      return;
+    }
+
+    try {
+      // Realiza el DELETE para eliminar la colonia
+      const response = await fetch(`${API_BASE_URL}/api/colony`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+        },
+        body: JSON.stringify({ uuid: rowToDelete.id }), // Envía el UUID en el cuerpo
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar la colonia. Verifica tu conexión o el token.');
+      }
+
+      // Actualiza el estado eliminando la colonia de la lista
+      setData((prevData) => prevData.filter((item) => item.id !== rowToDelete.id));
+
+      setSuccessMessage('Colonia eliminada correctamente.');
+      setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+
+      setConfirmAlertOpen(false); // Cierra el modal de confirmación
+      setRowToDelete(null); // Limpia la fila seleccionada
+    } catch (error) {
+      console.error('Error al eliminar la colonia:', error.message);
+    }
   };
 
   const handleCancelDelete = () => {
@@ -97,28 +218,30 @@ const Colonias = () => {
     setRowToDelete(null);
   };
 
-  const municipioObj = municipalities.find(m => m.id === selectedMunicipioId);
-
   const coloniaFields = [
-    { label: 'Municipio', name: 'municipio', type: 'select', options: [municipioObj.name], disabled: true },
     { label: 'Colonia', name: 'colonia', type: 'text', placeholder: 'Ingrese el nombre de la colonia' },
     { label: 'Nombre', name: 'nombre', type: 'text', placeholder: 'Ingrese el nombre del enlace' },
     { label: 'Apellido', name: 'apellido', type: 'text', placeholder: 'Ingrese el apellido del enlace' },
     { label: 'Correo', name: 'correo', type: 'email', placeholder: 'Ingrese el correo electrónico' },
-    { label: 'Teléfono', name: 'telefono', type: 'text', placeholder: 'Ingrese el teléfono' }
+    { label: 'Teléfono', name: 'telefono', type: 'text', placeholder: 'Ingrese el teléfono' },
+    { label: 'Contraseña', name: 'password', type: 'password', placeholder: 'Ingrese la contraseña' },
   ];
 
   return (
     <div className="p-8 bg-transparent">
       <div className="flex items-center justify-between mb-4">
-        <select value={selectedMunicipioId} onChange={handleMunicipioChange} className="border border-gray-300 rounded p-2">
-          {municipalities.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
-        <ButtonRegister label="Nuevo Enlace de Colonia" onClick={handleCreate} />
+        <h1 className="text-xl font-bold">Gestión de Colonias</h1>
+        <ButtonRegister label="Nueva Colonia" onClick={handleCreate} />
       </div>
+
+      {successMessage && (
+        <div className="bg-green-500 text-white text-center py-2 px-4 mb-4 rounded">
+          {successMessage}
+        </div>
+      )}
+
       <Table columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
+
       {modalOpen && (
         <ModalForm
           title={modalTitle}
@@ -128,9 +251,10 @@ const Colonias = () => {
           onClose={() => setModalOpen(false)}
         />
       )}
+
       {confirmAlertOpen && (
         <ConfirmAlert
-          message="¿Estás seguro de eliminar este registro?"
+          message="¿Estás seguro de eliminar esta colonia?"
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
         />
