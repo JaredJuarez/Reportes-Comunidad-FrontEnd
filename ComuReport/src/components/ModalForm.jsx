@@ -1,54 +1,54 @@
-// src/components/ModalForm.jsx
 import React, { useState, useEffect } from 'react';
 
 const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
   const [formData, setFormData] = useState(initialData || {});
-  const [errors, setErrors] = useState({});
+  const [images, setImages] = useState([]);
 
-  // Al cargar o cambiar initialData, precargamos select con el primer valor si está vacío
   useEffect(() => {
-    let newFormData = { ...initialData } || {};
-    fields.forEach((field) => {
-      if (
-        field.type === 'select' &&
-        (!newFormData[field.name] || newFormData[field.name] === '') &&
-        field.options &&
-        field.options.length > 0
-      ) {
-        newFormData[field.name] = field.options[0];
-      }
-    });
-    setFormData(newFormData);
-  }, [initialData, fields]);
+    setFormData(initialData || {});
+    setImages(initialData && initialData.images ? initialData.images : []);
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Limpiar error para el campo modificado
-    setErrors((prev) => ({ ...prev, [name]: '' }));
-    setFormData({ ...formData, [name]: value });
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    processFiles(droppedFiles);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleFileSelect = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    processFiles(selectedFiles);
+  };
+
+  const processFiles = (files) => {
+    const validFiles = [];
+    files.forEach(file => {
+      if ((file.type === 'image/jpeg' || file.type === 'image/png') && file.size <= 10 * 1024 * 1024) {
+        validFiles.push(file);
+      }
+    });
+    const total = [...images, ...validFiles];
+    if (total.length <= 3) {
+      setImages(total);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validación: verificar que ningún campo esté vacío
-    const newErrors = {};
-    fields.forEach((field) => {
-      if (!formData[field.name] || formData[field.name].trim() === '') {
-        newErrors[field.name] = 'Este campo es requerido';
-      }
-    });
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    onSubmit(formData);
+    onSubmit({ ...formData, images });
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent backdrop-filter backdrop-blur-sm fade-in">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent backdrop-filter fade-in backdrop-blur-sm">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">{title}</h2>
@@ -57,40 +57,67 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {fields.map((field, index) => (
-            <div key={index}>
-              <label className="block text-gray-700 mb-1">{field.label}</label>
-              {field.type === 'select' ? (
-                <select
-                  name={field.name}
-                  value={formData[field.name]}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {field.options &&
-                    field.options.map((option, idx) => (
-                      <option key={idx} value={option}>
-                        {option}
-                      </option>
+          {fields.map((field, i) => {
+            if (field.type === 'images') {
+              return (
+                <div key={i}>
+                  <label className="block text-gray-700 mb-1">{field.label}</label>
+                  <div
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    className="w-full p-4 border-2 border-dashed border-gray-300 rounded mb-2 text-center text-gray-600"
+                  >
+                    Arrastra y suelta tus imágenes aquí
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg"
+                    multiple
+                    onChange={handleFileSelect}
+                  />
+                  <div className="mt-2 text-sm text-gray-700">
+                    Imágenes seleccionadas:
+                    <ul className="list-disc ml-4">
+                      {images.map((img, idx) => (
+                        <li key={idx}>{img.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            } else if (field.type === 'select') {
+              return (
+                <div key={i}>
+                  <label className="block text-gray-700 mb-1">{field.label}</label>
+                  <select
+                    name={field.name}
+                    value={formData[field.name] || ''}
+                    onChange={handleChange}
+                    disabled={field.disabled}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    {field.options && field.options.map((option, idx) => (
+                      <option key={idx} value={option}>{option}</option>
                     ))}
-                </select>
-              ) : (
-                <input
-                  type={field.type}
-                  name={field.name}
-                  placeholder={field.placeholder}
-                  value={formData[field.name] || ''}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              )}
-              {errors[field.name] && (
-                <span className="text-red-500 text-xs">{errors[field.name]}</span>
-              )}
-            </div>
-          ))}
+                  </select>
+                </div>
+              );
+            } else {
+              return (
+                <div key={i}>
+                  <label className="block text-gray-700 mb-1">{field.label}</label>
+                  <input
+                    type={field.type}
+                    name={field.name}
+                    placeholder={field.placeholder}
+                    value={formData[field.name] || ''}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              );
+            }
+          })}
           <div className="flex justify-end space-x-2">
             <button
               type="button"
