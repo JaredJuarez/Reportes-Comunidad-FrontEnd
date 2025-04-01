@@ -12,23 +12,23 @@ const Login = () => {
     {
       name: 'email',
       type: 'email',
-      placeholder: 'Enter your email',
+      placeholder: 'Ingresa tu correo electrónico',
       required: true,
       icon: FaUser,
     },
     {
       name: 'password',
       type: 'password',
-      placeholder: 'Enter your password',
+      placeholder: 'Ingresa tu contraseña',
       required: true,
       icon: FaLock,
     },
   ];
 
   const users = [
-    { email: 'president@example.com', password: 'president123', role: 'presidentAdmin' },
-    { email: 'colony@example.com', password: 'colony123', role: 'colonyAdmin' },
-    { email: 'municipal@example.com', password: 'municipal123', role: 'municipalAdmin' },
+    { email: 'colony@comureport.com', password: 'colony123', role: 'colonyAdmin' },
+    { email: 'municipal@comureport.com', password: 'municipal123', role: 'municipalAdmin' },
+    { email: 'state@comureport.com', password: 'state123', role: 'stateAdmin' },
   ];
 
   const handleSubmit = (formData) => {
@@ -36,7 +36,7 @@ const Login = () => {
     const user = users.find((u) => u.email === email && u.password === password);
 
     if (user) {
-      if (user.role === 'presidentAdmin') navigate('/president-dashboard');
+      if (user.role === 'stateAdmin') navigate('/state-dashboard');
       else if (user.role === 'colonyAdmin') navigate('/colony-dashboard');
       else navigate('/municipal-dashboard');
     } else {
@@ -54,7 +54,7 @@ const Login = () => {
       />
 
       <div className="bg-[#290f46] w-full max-w-md p-8 mt-6 rounded-xl shadow-lg border border-white/10">
-        <h1 className="text-white text-2xl font-bold tracking-wide mb-6 text-end">
+        <h1 className="text-white text-2xl font-bold tracking-wide mb-6 text-center">
           Inicio de Sesión
         </h1>
 

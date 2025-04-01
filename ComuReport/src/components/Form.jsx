@@ -48,7 +48,7 @@ const Form = ({ fields, onSubmit }) => {
         type="submit"
         className="bg-white text-[#0D2538] w-full py-2 rounded-full font-semibold tracking-wide hover:bg-gray-100 transition-colors"
       >
-        Iniciar Sesión
+        Entrar
       </Button>
     </form>
   );
