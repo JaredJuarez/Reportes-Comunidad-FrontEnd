@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaLock } from 'react-icons/fa'; 
+import { FaUser, FaLock } from 'react-icons/fa';
 import Logo from '../assets/logo.png';
-import Form from '../components/Form';  
+import Form from '../components/Form';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,14 +40,16 @@ const Login = () => {
     const user = users.find((u) => u.email === email && u.password === password);
 
     if (user) {
-      if (user.role === 'stateAdmin') navigate('/state-dashboard');
-      else if (user.role === 'colonyAdmin') navigate('/colony-dashboard');
-      else navigate('/municipal-dashboard');
+      // Redirige a la subruta por defecto según el rol
+      if (user.role === 'stateAdmin') navigate('/state-dashboard/municipios');
+      else if (user.role === 'colonyAdmin') navigate('/colony-dashboard/presidents');
+      else navigate('/municipal-dashboard/colonies');
     } else {
       setError('Credenciales inválidas. Por favor, verifique sus datos e intente nuevamente.');
       setTimeout(() => setError(null), 3000);
     }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#210d38]">
