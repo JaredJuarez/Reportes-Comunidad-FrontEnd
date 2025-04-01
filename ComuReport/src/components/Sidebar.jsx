@@ -17,7 +17,7 @@ const Sidebar = ({ dashboardType }) => {
   
   const menuMapping = {
     state: [
-      { label: 'Municipios', route: '/state-dashboard', icon: FaBuilding },
+      { label: 'Municipios', route: '/state-dashboard/municipios', icon: FaBuilding },
     ],
     municipal: [
       { label: 'Colonias', route: '/municipal-dashboard/colonies', icon: FaUsers },
