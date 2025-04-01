@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FaBuilding,
   FaUsers,
@@ -13,8 +13,13 @@ import {
 
 const Sidebar = ({ dashboardType }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const navigate = useNavigate();
 
-  
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Elimina el token del localStorage
+    navigate('/'); // Redirige al usuario a la página de inicio
+  };
+
   const menuMapping = {
     state: [
       { label: 'Municipios', route: '/state-dashboard/municipios', icon: FaBuilding },
@@ -38,7 +43,6 @@ const Sidebar = ({ dashboardType }) => {
         isExpanded ? 'w-64' : 'w-20'
       } h-screen bg-[#210d38] text-white flex flex-col justify-between transition-all duration-300`}
     >
-      
       <div>
         <div className="p-4 flex items-center justify-between">
           {isExpanded && <span className="text-2xl font-bold">Menú</span>}
@@ -46,7 +50,6 @@ const Sidebar = ({ dashboardType }) => {
             {isExpanded ? <FaAngleDoubleLeft /> : <FaAngleDoubleRight />}
           </button>
         </div>
-        
         <nav className="p-4">
           <ul className="space-y-4">
             {menuItems.map((item, index) => {
@@ -70,15 +73,14 @@ const Sidebar = ({ dashboardType }) => {
           </ul>
         </nav>
       </div>
-      
       <div className="p-4">
-        <NavLink
-          to="/"
-          className="flex items-center p-2 hover:bg-gray-700 rounded"
+        <button
+          onClick={handleLogout}
+          className="flex items-center p-2 hover:bg-gray-700 rounded w-full text-left"
         >
           <FaSignOutAlt className="text-xl" />
           {isExpanded && <span className="ml-4">Cerrar Sesión</span>}
-        </NavLink>
+        </button>
       </div>
     </div>
   );

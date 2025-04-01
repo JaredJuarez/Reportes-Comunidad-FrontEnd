@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ColonyDashboard from './pages/ColonyDashboard';
 import Presidents from './pages/colony/Presidents';
@@ -10,28 +10,52 @@ import Areas from './pages/municipal/Areas';
 import StateDashboard from './pages/StateDashboard';
 import Municipios from './pages/state/Municipios';
 
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/" />;
+};
+
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
 
-        <Route path="/colony-dashboard" element={<ColonyDashboard />}>
-          
+        <Route
+          path="/colony-dashboard"
+          element={
+            <PrivateRoute>
+              <ColonyDashboard />
+            </PrivateRoute>
+          }
+        >
           <Route path="presidents" element={<Presidents />} />
           <Route path="reports" element={<Reports />} />
         </Route>
 
-        <Route path='/municipal-dashboard' element={<MunicipalDashboard />}>
-          <Route path='colonies' element={<Colonies />} />
-          <Route path='reports' element={<ReportsMunicipal />} />
-          <Route path='areas' element={<Areas />} />
+        <Route
+          path="/municipal-dashboard"
+          element={
+            <PrivateRoute>
+              <MunicipalDashboard />
+            </PrivateRoute>
+          }
+        >
+          <Route path="colonies" element={<Colonies />} />
+          <Route path="reports" element={<ReportsMunicipal />} />
+          <Route path="areas" element={<Areas />} />
         </Route>
 
-        <Route path='/state-dashboard' element={<StateDashboard />} >
-          <Route path='municipios' element={<Municipios />} />
+        <Route
+          path="/state-dashboard"
+          element={
+            <PrivateRoute>
+              <StateDashboard />
+            </PrivateRoute>
+          }
+        >
+          <Route path="municipios" element={<Municipios />} />
         </Route>
-
       </Routes>
     </Router>
   );

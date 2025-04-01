@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock } from 'react-icons/fa';
 import Logo from '../assets/logo.png';
 import Form from '../components/Form';
+import API_BASE_URL from '../api_config';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,27 +30,36 @@ const Login = () => {
     },
   ];
 
-  const users = [
-    { email: 'colony@comureport.com', password: 'colony123', role: 'colonyAdmin' },
-    { email: 'municipal@comureport.com', password: 'municipal123', role: 'municipalAdmin' },
-    { email: 'state@comureport.com', password: 'state123', role: 'stateAdmin' },
-  ];
-
-  const handleSubmit = (formData) => {
+  const handleSubmit = async (formData) => {
     const { email, password } = formData;
-    const user = users.find((u) => u.email === email && u.password === password);
 
-    if (user) {
-      // Redirige a la subruta por defecto según el rol
-      if (user.role === 'stateAdmin') navigate('/state-dashboard/municipios');
-      else if (user.role === 'colonyAdmin') navigate('/colony-dashboard/presidents');
-      else navigate('/municipal-dashboard/colonies');
-    } else {
-      setError('Credenciales inválidas. Por favor, verifique sus datos e intente nuevamente.');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Credenciales inválidas. Por favor, verifique sus datos e intente nuevamente.');
+      }
+
+      const data = await response.json();
+      const { role, token } = data;
+
+      // Almacena el token en localStorage
+      localStorage.setItem('token', token);
+
+      // Redirige según el rol del usuario
+      if (role === 'State') navigate('/state-dashboard/municipios');
+      else if (role === 'Colony') navigate('/colony-dashboard/presidents');
+      else if (role === 'Municipality') navigate('/municipal-dashboard/colonies');
+      else throw new Error('Rol de usuario no reconocido.');
+    } catch (error) {
+      setError(error.message);
       setTimeout(() => setError(null), 3000);
     }
   };
-
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#210d38]">
