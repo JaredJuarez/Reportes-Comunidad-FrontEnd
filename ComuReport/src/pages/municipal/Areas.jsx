@@ -3,45 +3,67 @@ import Table from '../../components/Table';
 import ButtonRegister from '../../components/ButtonRegister';
 import ModalForm from '../../components/ModalForm';
 import ConfirmAlert from '../../components/ConfirmAlert';
-
-const municipalities = [
-  { id: 1, name: 'Cuernavaca', state: 'Morelos' },
-  { id: 2, name: 'Jiutepec', state: 'Morelos' },
-  { id: 3, name: 'Temixco', state: 'Morelos' }
-];
-
-let areasList = [
-  { id: 1, municipioId: 1, municipio: 'Cuernavaca', areaName: 'Seguridad', responsable: 'Ana', correo: 'ana@example.com', telefono: '555-1111' },
-  { id: 2, municipioId: 1, municipio: 'Cuernavaca', areaName: 'Obras Públicas', responsable: 'Luis', correo: 'luis@example.com', telefono: '555-2222' },
-  { id: 3, municipioId: 2, municipio: 'Jiutepec', areaName: 'Salud', responsable: 'Pedro', correo: 'pedro@example.com', telefono: '555-3333' }
-];
+import API_BASE_URL from '../../api_config';
 
 const Areas = () => {
-  const [selectedMunicipioId, setSelectedMunicipioId] = useState(municipalities[0].id);
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalInitialData, setModalInitialData] = useState(null);
   const [confirmAlertOpen, setConfirmAlertOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const fetchAreas = async () => {
+    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+
+    if (!token) {
+      console.error('No se encontró un token en localStorage.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/area/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener las áreas. Verifica tu conexión o el token.');
+      }
+
+      const areas = await response.json();
+
+      // Mapea los datos para adaptarlos al formato esperado por la tabla
+      const formattedData = areas.map((area) => ({
+        id: area.uuid,
+        nameArea: area.nameArea,
+        name: area.personBean.name,
+        lastname: area.personBean.lastname,
+        email: area.personBean.email,
+        phone: area.personBean.phone,
+      }));
+
+      setData(formattedData);
+    } catch (error) {
+      console.error('Error al obtener las áreas:', error.message);
+    }
+  };
 
   useEffect(() => {
-    setData(areasList.filter(a => a.municipioId === selectedMunicipioId));
-  }, [selectedMunicipioId]);
+    fetchAreas(); // Llama a la función para obtener las áreas al cargar el componente
+  }, []);
 
   const columns = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'Municipio', accessor: 'municipio' },
-    { header: 'Área', accessor: 'areaName' },
-    { header: 'Responsable', accessor: 'responsable' },
-    { header: 'Correo', accessor: 'correo' },
-    { header: 'Teléfono', accessor: 'telefono' }
+    { header: 'Área', accessor: 'nameArea' },
+    { header: 'Nombre', accessor: 'name' },
+    { header: 'Apellido', accessor: 'lastname' },
+    { header: 'Correo', accessor: 'email' },
+    { header: 'Teléfono', accessor: 'phone' },
   ];
-
-  const handleMunicipioChange = (e) => {
-    const newId = Number(e.target.value);
-    setSelectedMunicipioId(newId);
-  };
 
   const handleEdit = (row) => {
     setModalTitle('Editar Área');
@@ -55,28 +77,79 @@ const Areas = () => {
   };
 
   const handleCreate = () => {
-    const m = municipalities.find(m => m.id === selectedMunicipioId);
     setModalTitle('Crear Nueva Área');
-    setModalInitialData({ id: '', municipioId: m.id, municipio: m.name, areaName: '', responsable: '', correo: '', telefono: '' });
+    setModalInitialData({
+      id: '',
+      nameArea: '',
+      name: '',
+      lastname: '',
+      email: '',
+      phone: '',
+      password: '',
+    });
     setModalOpen(true);
   };
 
-  const handleModalSubmit = (formData) => {
-    if (modalTitle === 'Crear Nueva Área') {
-      const newId = areasList.length ? Math.max(...areasList.map(a => a.id)) + 1 : 1;
-      const newItem = { ...formData, id: newId };
-      areasList = [...areasList, newItem];
-      setData(areasList.filter(a => a.municipioId === selectedMunicipioId));
-    } else {
-      areasList = areasList.map(a => (a.id === formData.id ? formData : a));
-      setData(areasList.filter(a => a.municipioId === selectedMunicipioId));
+   const handleModalSubmit = async (formData) => {
+    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+  
+    if (!token) {
+      console.error('No se encontró un token en localStorage.');
+      return;
     }
-    setModalOpen(false);
+  
+    try {
+      if (modalTitle === 'Crear Nueva Área') {
+        // Realiza el POST para crear una nueva área
+        const response = await fetch(`${API_BASE_URL}/api/area/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+          },
+          body: JSON.stringify({
+            nameArea: formData.nameArea,
+            name: formData.name,
+            lastname: formData.lastname,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Error al crear el área. Verifica los datos enviados.');
+        }
+  
+        // Maneja la respuesta como texto si no es JSON
+        const result = await response.text();
+  
+        // Actualiza el estado con la nueva área (opcional, si el servidor no devuelve el área creada)
+        setData((prevData) => [
+          ...prevData,
+          {
+            id: Date.now(), // Genera un ID temporal
+            nameArea: formData.nameArea,
+            name: formData.name,
+            lastname: formData.lastname,
+            email: formData.email,
+            phone: formData.phone,
+          },
+        ]);
+  
+        // Muestra el mensaje de éxito
+        setSuccessMessage('Área agregada correctamente.');
+        setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+      }
+  
+      setModalOpen(false); // Cierra el modal
+    } catch (error) {
+      console.error('Error al crear o actualizar el área:', error.message);
+    }
   };
 
   const handleConfirmDelete = () => {
-    areasList = areasList.filter(a => a.id !== rowToDelete.id);
-    setData(areasList.filter(a => a.municipioId === selectedMunicipioId));
+    setData(data.filter((a) => a.id !== rowToDelete.id));
     setConfirmAlertOpen(false);
     setRowToDelete(null);
   };
@@ -86,24 +159,19 @@ const Areas = () => {
     setRowToDelete(null);
   };
 
-  const mObj = municipalities.find(m => m.id === selectedMunicipioId);
-
   const areaFields = [
-    { label: 'Municipio', name: 'municipio', type: 'select', options: [mObj.name], disabled: true },
-    { label: 'Área', name: 'areaName', type: 'text', placeholder: 'Nombre de la área' },
-    { label: 'Responsable', name: 'responsable', type: 'text', placeholder: 'Responsable del área' },
-    { label: 'Correo', name: 'correo', type: 'email', placeholder: 'Correo de contacto' },
-    { label: 'Teléfono', name: 'telefono', type: 'text', placeholder: 'Teléfono de contacto' }
+    { label: 'Área', name: 'nameArea', type: 'text', placeholder: 'Nombre del área' },
+    { label: 'Nombre', name: 'name', type: 'text', placeholder: 'Nombre del responsable' },
+    { label: 'Apellido', name: 'lastname', type: 'text', placeholder: 'Apellido del responsable' },
+    { label: 'Correo', name: 'email', type: 'email', placeholder: 'Correo de contacto' },
+    { label: 'Teléfono', name: 'phone', type: 'text', placeholder: 'Teléfono de contacto' },
+    { label: 'Contraseña', name: 'password', type: 'password', placeholder: 'Contraseña' },
   ];
 
   return (
     <div className="p-8 bg-transparent">
       <div className="flex items-center justify-between mb-4">
-        <select value={selectedMunicipioId} onChange={handleMunicipioChange} className="border border-gray-300 rounded p-2">
-          {municipalities.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
+        <h1 className="text-xl font-bold">Gestión de Áreas</h1>
         <ButtonRegister label="Nueva Área" onClick={handleCreate} />
       </div>
       <Table columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
