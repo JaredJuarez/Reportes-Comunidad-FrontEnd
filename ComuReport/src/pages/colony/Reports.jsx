@@ -33,12 +33,14 @@ const Reports = () => {
   const [modalInitialData, setModalInitialData] = useState(null);
   const [confirmAlertOpen, setConfirmAlertOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const columns = [
     { header: 'ID', accessor: 'id' },
     { header: 'Nombre del Reporte', accessor: 'reportName' },
     { header: 'Fecha', accessor: 'date' },
     { header: 'Estado', accessor: 'status', cell: row => <Badge status={row.status} /> },
-    { header: 'Área', accessor: 'area' }
+    { header: 'Área', accessor: 'area' },
+    { header: 'Evidencias', accessor: 'images', cell: row => row.images && row.images.length > 0 ? row.images.map((file, idx) => <img key={idx} src={URL.createObjectURL(file)} alt="" onClick={() => setPreviewImage(URL.createObjectURL(file))} className="w-10 h-10 object-cover cursor-pointer mr-2" />) : 'Sin evidencias' }
   ];
   const handleEdit = (row) => {
     setModalTitle('Editar Reporte');
@@ -95,6 +97,11 @@ const Reports = () => {
       )}
       {confirmAlertOpen && (
         <ConfirmAlert message="¿Estás seguro de eliminar este reporte?" onConfirm={handleConfirmDelete} onCancel={handleCancelDelete} />
+      )}
+      {previewImage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent backdrop-filter backdrop-blur-sm" onClick={() => setPreviewImage(null)}>
+          <img src={previewImage} alt="" className="max-w-full max-h-full" />
+        </div>
       )}
     </div>
   );
