@@ -1,17 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
-import AdminDashboard from './pages/AdminDashboard';
 import PresidentDashboard from './pages/PresidentDashboard';
-import UserDashboard from './pages/UserManagement';
+import ColonyDashboard from './pages/ColonyDashboard';
+import MunicipalDashboard from './pages/MunicipalDashboard';
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/president-dashboard" element={<PresidentDashboard />} />
-        <Route path="/user-dashboard" element={<UserDashboard />} />
+        <Route path='/colony-dashboard' element={<ColonyDashboard />} />
+        <Route path='/municipal-dashboard' element={<MunicipalDashboard />} />
       </Routes>
     </Router>
   );
