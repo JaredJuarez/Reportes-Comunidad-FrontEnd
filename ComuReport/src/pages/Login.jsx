@@ -15,6 +15,8 @@ const Login = () => {
       placeholder: 'Ingresa tu correo electrónico',
       required: true,
       icon: FaUser,
+      pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
+      title: 'Por favor, ingresa un correo electrónico válido.',
     },
     {
       name: 'password',
@@ -22,6 +24,8 @@ const Login = () => {
       placeholder: 'Ingresa tu contraseña',
       required: true,
       icon: FaLock,
+      pattern: '^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$',
+      title: 'La contraseña debe tener al menos 8 caracteres, incluyendo al menos una letra y un número.',
     },
   ];
 
