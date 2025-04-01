@@ -4,7 +4,7 @@ import ColonyDashboard from './pages/ColonyDashboard';
 import Presidents from './pages/colony/Presidents';
 import Reports from './pages/colony/Reports';
 import MunicipalDashboard from './pages/MunicipalDashboard';
-import Colonies from './pages/municipal/Colonies';
+import Colonies from './pages/municipal/Colonias';
 import ReportsMunicipal from './pages/municipal/Reports';
 import Areas from './pages/municipal/Areas';
 import StateDashboard from './pages/StateDashboard';
