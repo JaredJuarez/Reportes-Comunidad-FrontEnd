@@ -54,6 +54,7 @@ const Login = () => {
       if (role === 'State') navigate('/state-dashboard/municipios');
       else if (role === 'Colony') navigate('/colony-dashboard/presidents');
       else if (role === 'Municipality') navigate('/municipal-dashboard/colonies');
+      else if (role === 'Area') navigate('/area-dashboard/statusControl');
       else throw new Error('Rol de usuario no reconocido.');
     } catch (error) {
       setError(error.message);
