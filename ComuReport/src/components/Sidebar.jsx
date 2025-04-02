@@ -9,6 +9,7 @@ import {
   FaSignOutAlt,
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
+  FaUserCheck,
 } from 'react-icons/fa';
 
 const Sidebar = ({ dashboardType }) => {
@@ -21,6 +22,9 @@ const Sidebar = ({ dashboardType }) => {
   };
 
   const menuMapping = {
+    area: [
+      { label: 'Control de problemas', route: '/area-dashboard/statusControl', icon: FaUserCheck },
+    ],
     state: [
       { label: 'Municipios', route: '/state-dashboard/municipios', icon: FaBuilding },
     ],

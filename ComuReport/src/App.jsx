@@ -9,6 +9,8 @@ import ReportsMunicipal from './pages/municipal/Reports';
 import Areas from './pages/municipal/Areas';
 import StateDashboard from './pages/StateDashboard';
 import Municipios from './pages/state/Municipios';
+import AreaDashboard from './pages/AreaDashboard';
+import StatusArea from './pages/area/StatusArea';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -55,6 +57,17 @@ const App = () => {
           }
         >
           <Route path="municipios" element={<Municipios />} />
+        </Route>
+        
+        <Route
+          path="/area-dashboard"
+          element={
+            <PrivateRoute>
+              <AreaDashboard />
+            </PrivateRoute>
+          }
+        >
+          <Route path="statusControl" element={<StatusArea />} />
         </Route>
       </Routes>
     </Router>
