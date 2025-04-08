@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock } from 'react-icons/fa';
 import Logo from '../assets/logo.png';
@@ -8,6 +8,20 @@ import API_BASE_URL from '../api_config';
 const Login = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+
+  // Verifica si el usuario ya está autenticado
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+
+    if (token) {
+      // Redirige al dashboard correspondiente según el rol
+      if (role === 'State') navigate('/state-dashboard/municipios', { replace: true });
+      else if (role === 'Colony') navigate('/colony-dashboard/presidents', { replace: true });
+      else if (role === 'Municipality') navigate('/municipal-dashboard/colonies', { replace: true });
+      else if (role === 'Area') navigate('/area-dashboard/statusControl', { replace: true });
+    }
+  }, [navigate]);
 
   const fields = [
     {
@@ -47,8 +61,9 @@ const Login = () => {
       const data = await response.json();
       const { role, token } = data;
 
-      // Almacena el token en localStorage
+      // Almacena el token y el rol en localStorage
       localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
 
       // Redirige según el rol del usuario
       if (role === 'State') navigate('/state-dashboard/municipios');
@@ -63,7 +78,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#210d38]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
       <img
         src={Logo}
         alt="ComuReport Logo"

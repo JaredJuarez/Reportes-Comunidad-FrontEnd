@@ -3,6 +3,7 @@ import Table from '../../components/Table';
 import ButtonRegister from '../../components/ButtonRegister';
 import ModalForm from '../../components/ModalForm';
 import ConfirmAlert from '../../components/ConfirmAlert';
+import ErrorAlert from '../../components/ErrorAlert';
 import API_BASE_URL from '../../api_config';
 
 const Colonias = () => {
@@ -13,6 +14,7 @@ const Colonias = () => {
   const [confirmAlertOpen, setConfirmAlertOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Función para obtener las colonias desde la API
   const fetchColonias = async () => {
@@ -95,7 +97,54 @@ const Colonias = () => {
     const token = localStorage.getItem('token'); // Obtiene el token del localStorage
 
     if (!token) {
-      console.error('No se encontró un token en localStorage.');
+      setErrorMessage('No se encontró un token en localStorage.');
+      return;
+    }
+
+    // Validaciones de los campos
+    if (!formData.colonia || formData.colonia.trim() === '') {
+      setErrorMessage('El nombre de la colonia es obligatorio.');
+      return;
+    }
+
+    if (!formData.nombre || formData.nombre.trim() === '') {
+      setErrorMessage('El nombre del enlace es obligatorio.');
+      return;
+    }
+
+    if (!formData.apellido || formData.apellido.trim() === '') {
+      setErrorMessage('El apellido del enlace es obligatorio.');
+      return;
+    }
+
+    if (!formData.correo || formData.correo.trim() === '') {
+      setErrorMessage('El correo electrónico es obligatorio.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.correo)) {
+      setErrorMessage('El correo electrónico no tiene un formato válido.');
+      return;
+    }
+
+    if (!formData.password || formData.password.trim() === '') {
+      setErrorMessage('La contraseña es obligatoria.');
+      return;
+    }
+
+    // Validación de contraseña segura
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setErrorMessage(
+        'La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.'
+      );
+      return;
+    }
+
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!formData.telefono || !phoneRegex.test(formData.telefono)) {
+      setErrorMessage('El teléfono debe contener 10 dígitos numéricos.');
       return;
     }
 
@@ -233,6 +282,13 @@ const Colonias = () => {
         <h1 className="text-xl font-bold">Gestión de Colonias</h1>
         <ButtonRegister label="Nueva Colonia" onClick={handleCreate} />
       </div>
+
+      {errorMessage && (
+        <ErrorAlert
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)} // Limpia el mensaje de error al cerrar
+        />
+      )}
 
       {successMessage && (
         <div className="bg-green-500 text-white text-center py-2 px-4 mb-4 rounded">

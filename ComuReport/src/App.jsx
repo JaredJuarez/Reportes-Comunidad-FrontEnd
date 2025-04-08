@@ -18,11 +18,20 @@ const PrivateRoute = ({ children }) => {
 };
 
 const App = () => {
+  const token = localStorage.getItem('token');
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        {/* Ruta para el login */}
+        <Route
+          path="/"
+          element={
+            token ? <Navigate to="/colony-dashboard" /> : <Login />
+          }
+        />
 
+        {/* Rutas protegidas */}
         <Route
           path="/colony-dashboard"
           element={
@@ -58,7 +67,7 @@ const App = () => {
         >
           <Route path="municipios" element={<Municipios />} />
         </Route>
-        
+
         <Route
           path="/area-dashboard"
           element={
