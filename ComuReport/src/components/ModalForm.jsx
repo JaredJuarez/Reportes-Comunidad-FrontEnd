@@ -48,7 +48,7 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent backdrop-filter fade-in backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center z-40 bg-transparent backdrop-filter fade-in backdrop-blur-sm">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">{title}</h2>

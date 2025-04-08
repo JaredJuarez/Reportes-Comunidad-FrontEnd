@@ -3,6 +3,7 @@ import Table from '../../components/Table';
 import ButtonRegister from '../../components/ButtonRegister';
 import ModalForm from '../../components/ModalForm';
 import ConfirmAlert from '../../components/ConfirmAlert';
+import ErrorAlert from '../../components/ErrorAlert';
 import API_BASE_URL from '../../api_config';
 
 const Areas = () => {
@@ -13,6 +14,12 @@ const Areas = () => {
   const [confirmAlertOpen, setConfirmAlertOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null); // Estado para manejar el mensaje de error
+
+  // Función para mostrar el mensaje de error
+  const showError = (message) => {
+    setErrorMessage(message);
+  };
 
   const fetchAreas = async () => {
     const token = localStorage.getItem('token'); // Obtiene el token del localStorage
@@ -94,7 +101,54 @@ const Areas = () => {
     const token = localStorage.getItem('token'); // Obtiene el token del localStorage
 
     if (!token) {
-      console.error('No se encontró un token en localStorage.');
+      showError('No se encontró un token en localStorage.');
+      return;
+    }
+
+    // Validaciones de los campos
+    if (!formData.nameArea || formData.nameArea.trim() === '') {
+      showError('El nombre del área es obligatorio.');
+      return;
+    }
+
+    if (!formData.name || formData.name.trim() === '') {
+      showError('El nombre del responsable es obligatorio.');
+      return;
+    }
+
+    if (!formData.lastname || formData.lastname.trim() === '') {
+      showError('El apellido del responsable es obligatorio.');
+      return;
+    }
+
+    if (!formData.email || formData.email.trim() === '') {
+      showError('El correo electrónico es obligatorio.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      showError('El correo electrónico no tiene un formato válido.');
+      return;
+    }
+
+    if (!formData.password || formData.password.trim() === '') {
+      showError('La contraseña es obligatoria.');
+      return;
+    }
+
+    // Validación de contraseña segura
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      showError(
+        'La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.'
+      );
+      return;
+    }
+
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!formData.phone || !phoneRegex.test(formData.phone)) {
+      showError('El teléfono debe contener 10 dígitos numéricos.');
       return;
     }
 
@@ -123,8 +177,9 @@ const Areas = () => {
 
         // Maneja la respuesta como texto si no es JSON
         const result = await response.text();
+        console.log('Respuesta del servidor:', result);
 
-        // Actualiza el estado con la nueva área (opcional, si el servidor no devuelve el área creada)
+        // Actualiza el estado con los datos enviados (si el servidor no devuelve el área creada)
         setData((prevData) => [
           ...prevData,
           {
@@ -137,14 +192,41 @@ const Areas = () => {
           },
         ]);
 
-        // Muestra el mensaje de éxito
         setSuccessMessage('Área agregada correctamente.');
+        setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+      } else if (modalTitle === 'Editar Área') {
+        // Realiza el PUT para actualizar un área existente
+        const response = await fetch(`${API_BASE_URL}/api/area/${formData.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+          },
+          body: JSON.stringify({
+            nameArea: formData.nameArea,
+            name: formData.name,
+            lastname: formData.lastname,
+            email: formData.email,
+            phone: formData.phone,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el área. Verifica los datos enviados.');
+        }
+
+        // Actualiza el estado con los datos editados
+        setData((prevData) =>
+          prevData.map((item) => (item.id === formData.id ? formData : item))
+        );
+
+        setSuccessMessage('Área actualizada correctamente.');
         setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
       }
 
       setModalOpen(false); // Cierra el modal
     } catch (error) {
-      console.error('Error al crear o actualizar el área:', error.message);
+      showError(`Error al crear o actualizar el área: ${error.message}`);
     }
   };
 
@@ -205,7 +287,22 @@ const Areas = () => {
         <h1 className="text-xl font-bold">Gestión de Áreas</h1>
         <ButtonRegister label="Nueva Área" onClick={handleCreate} />
       </div>
+
+      {errorMessage && (
+        <ErrorAlert
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)} // Limpia el mensaje de error al cerrar
+        />
+      )}
+
+      {successMessage && (
+        <div className="bg-green-500 text-white text-center py-2 px-4 mb-4 rounded">
+          {successMessage}
+        </div>
+      )}
+
       <Table columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
+
       {modalOpen && (
         <ModalForm
           title={modalTitle}
