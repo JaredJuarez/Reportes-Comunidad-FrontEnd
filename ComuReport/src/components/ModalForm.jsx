@@ -44,7 +44,7 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ ...formData, images });
+    onSubmit({ ...formData, file: images });
   };
 
   return (
@@ -58,7 +58,7 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           {fields.map((field, i) => {
-            if (field.type === 'images') {
+            if ((field.type === 'images' || field.type === 'file') && field.name) {
               return (
                 <div key={i}>
                   <label className="block text-gray-700 mb-1">{field.label}</label>

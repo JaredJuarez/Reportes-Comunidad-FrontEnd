@@ -18,6 +18,7 @@ const Sidebar = ({ dashboardType }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Elimina el token del localStorage
+    localStorage.removeItem('role'); // Elimina el token del localStorage
     navigate('/'); // Redirige al usuario a la página de inicio
   };
 
@@ -34,7 +35,6 @@ const Sidebar = ({ dashboardType }) => {
       { label: 'Áreas', route: '/municipal-dashboard/areas', icon: FaSitemap },
     ],
     colony: [
-      { label: 'Presidentes', route: '/colony-dashboard/presidents', icon: FaUserTie },
       { label: 'Reportes', route: '/colony-dashboard/reports', icon: FaChartBar },
     ],
   };
