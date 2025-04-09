@@ -1,17 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-const ErrorAlert = ({ message, onClose, duration = 3000 }) => {
+const ErrorAlert = ({ message, onClose, duration = 8000 }) => {
+  const alertRef = useRef(null);
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onClose(); // Llama a la función para cerrar la alerta después del tiempo definido
+      onClose();
     }, duration);
 
-    return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta
+    return () => clearTimeout(timer);
   }, [onClose, duration]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (alertRef.current && !alertRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 flex items-start mt-2 justify-center z-50 fade-in">
-      <div className="bg-red-500 text-white rounded-lg shadow-lg w-full max-w-sm p-4">
+      <div
+        ref={alertRef}
+        className="bg-red-500 text-white rounded-lg shadow-lg w-full max-w-sm p-4"
+      >
         <h3 className="text-lg font-bold mb-2">Error</h3>
         <p>{message}</p>
       </div>

@@ -69,7 +69,7 @@ const Colonias = () => {
   ];
 
   const handleCreate = () => {
-    setModalTitle('Crear Nueva Colonia');
+    setModalTitle('Crear Nuevo Presidente');
     setModalInitialData({
       id: '',
       colonia: '',
@@ -149,7 +149,7 @@ const Colonias = () => {
     }
 
     try {
-      if (modalTitle === 'Crear Nueva Colonia') {
+      if (modalTitle === 'Crear Nuevo Presidente') {
         // Realiza el POST para crear una nueva colonia
         const response = await fetch(`${API_BASE_URL}/api/colony`, {
           method: 'POST',
@@ -279,8 +279,8 @@ const Colonias = () => {
   return (
     <div className="p-8 bg-transparent">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">Gestión de Colonias</h1>
-        <ButtonRegister label="Nueva Colonia" onClick={handleCreate} />
+        <h1 className="text-xl font-bold">Gestión de Presidentes</h1>
+        <ButtonRegister label="Nuevo Presidente" onClick={handleCreate} />
       </div>
 
       {errorMessage && (
