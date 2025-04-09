@@ -10,7 +10,7 @@ const ErrorAlert = ({ message, onClose, duration = 3000 }) => {
   }, [onClose, duration]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent backdrop-blur-sm bg-opacity-50 fade-in">
+    <div className="fixed inset-0 flex items-start mt-2 justify-center z-50 fade-in">
       <div className="bg-red-500 text-white rounded-lg shadow-lg w-full max-w-sm p-4">
         <h3 className="text-lg font-bold mb-2">Error</h3>
         <p>{message}</p>

@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ColonyDashboard from './pages/ColonyDashboard';
-import Presidents from './pages/colony/Presidents';
 import Reports from './pages/colony/Reports';
 import MunicipalDashboard from './pages/MunicipalDashboard';
 import Colonies from './pages/municipal/Colonias';
@@ -23,15 +22,12 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        {/* Ruta para el login */}
-        <Route
-          path="/"
-          element={
-            token ? <Navigate to="/colony-dashboard" /> : <Login />
-          }
-        />
+          <Route
+            path="/"
+            element={<Login />}
+          />
 
-        {/* Rutas protegidas */}
+          {/* Rutas protegidas */}
         <Route
           path="/colony-dashboard"
           element={
@@ -40,7 +36,6 @@ const App = () => {
             </PrivateRoute>
           }
         >
-          <Route path="presidents" element={<Presidents />} />
           <Route path="reports" element={<Reports />} />
         </Route>
 

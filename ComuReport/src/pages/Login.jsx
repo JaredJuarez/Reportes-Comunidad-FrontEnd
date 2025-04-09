@@ -17,7 +17,7 @@ const Login = () => {
     if (token) {
       // Redirige al dashboard correspondiente según el rol
       if (role === 'State') navigate('/state-dashboard/municipios', { replace: true });
-      else if (role === 'Colony') navigate('/colony-dashboard/presidents', { replace: true });
+      else if (role === 'Colony') navigate('/colony-dashboard/reports', { replace: true });
       else if (role === 'Municipality') navigate('/municipal-dashboard/colonies', { replace: true });
       else if (role === 'Area') navigate('/area-dashboard/statusControl', { replace: true });
     }
@@ -67,7 +67,7 @@ const Login = () => {
 
       // Redirige según el rol del usuario
       if (role === 'State') navigate('/state-dashboard/municipios');
-      else if (role === 'Colony') navigate('/colony-dashboard/presidents');
+      else if (role === 'Colony') navigate('/colony-dashboard/reports');
       else if (role === 'Municipality') navigate('/municipal-dashboard/colonies');
       else if (role === 'Area') navigate('/area-dashboard/statusControl');
       else throw new Error('Rol de usuario no reconocido.');
