@@ -131,7 +131,7 @@ const Reports = () => {
       return;
     }
 
-    if (files.length > 4) {
+    if (files.length > 3) {
       setErrorMessage("Solo puedes subir un máximo de 3 imágenes.");
       return;
     }
@@ -201,7 +201,7 @@ const Reports = () => {
         </div>
       )}
 
-      <Table columns={columns} data={data} />
+      <Table columns={columns} data={data} showActions={false} />
 
       {modalOpen && (
         <div
