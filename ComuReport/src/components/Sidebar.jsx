@@ -30,7 +30,7 @@ const Sidebar = ({ dashboardType }) => {
       { label: 'Municipios', route: '/state-dashboard/municipios', icon: FaBuilding },
     ],
     municipal: [
-      { label: 'Colonias', route: '/municipal-dashboard/colonies', icon: FaUsers },
+      { label: 'Presidentes', route: '/municipal-dashboard/colonies', icon: FaUsers },
       { label: 'Reportes', route: '/municipal-dashboard/reports', icon: FaChartBar },
       { label: 'Áreas', route: '/municipal-dashboard/areas', icon: FaSitemap },
     ],
