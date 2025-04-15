@@ -40,17 +40,21 @@ const Reports = () => {
       header: "Evidencias",
       accessor: "image",
       cell: (row) =>
-        row.image && row.image.length > 0
-          ? row.image.map((file, idx) => (
+        row.image && row.image.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {row.image.map((file, idx) => (
               <img
                 key={idx}
                 src={file.url}
                 alt="Evidencia"
-                onClick={() => setPreviewImage(file.url)} // Muestra la vista previa al hacer clic
-                className="w-10 h-10 object-cover cursor-pointer mr-2"
+                onClick={() => setPreviewImage(file.url)}
+                className="w-12 h-12 object-cover cursor-pointer rounded-md shadow-md hover:opacity-80"
               />
-            ))
-          : "Sin evidencias",
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-500 italic">Sin evidencias</span>
+        ),
     },
   ];
 

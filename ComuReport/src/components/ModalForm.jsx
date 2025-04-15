@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
+const ModalForm = ({ title, fields, initialData, onSubmit, onClose ,type }) => {
   const [formData, setFormData] = useState(initialData || {});
   const [file, setFile] = useState([]); // Cambia el nombre del estado de imágenes
   const [previewImages, setPreviewImages] = useState([]);
@@ -107,6 +107,12 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
             &times;
           </button>
         </div>
+        {type === "create" && (
+          <p className="text-sm text-gray-500 mb-4">
+            Después de crear el presidente, solo se podrán modificar los datos
+            de contacto como el correo y el teléfono.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           {fields.map((field, i) => {
             if (

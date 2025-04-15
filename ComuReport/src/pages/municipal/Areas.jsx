@@ -88,7 +88,6 @@ const Areas = () => {
   const handleCreate = () => {
     setModalTitle("Crear Nueva Área");
     setModalInitialData({
-      id: "",
       nameArea: "",
       name: "",
       lastname: "",
