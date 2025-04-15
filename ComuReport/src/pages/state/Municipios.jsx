@@ -78,7 +78,7 @@ const Municipios = () => {
   const handleCreate = () => {
     setModalTitle("Crear Nuevo Municipio");
     setModalInitialData({
-      municipalityName: "",
+      nameMunicipality: "",
       name: "",
       lastname: "",
       email: "",
@@ -108,7 +108,7 @@ const Municipios = () => {
     }
 
     // Validaciones de los campos
-    if (!formData.municipalityName || formData.municipalityName.trim() === "") {
+    if (!formData.nameMunicipality || formData.nameMunicipality.trim() === "") {
       showError("El nombre del municipio es obligatorio.");
       return;
     }
@@ -163,7 +163,7 @@ const Municipios = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            municipalityName: formData.municipalityName,
+            nameMunicipality: formData.nameMunicipality,
             password: formData.password,
             email: formData.email,
             name: formData.name,
@@ -184,7 +184,7 @@ const Municipios = () => {
         setData((prevData) => [
           ...prevData,
           {
-            nameMunicipality: formData.municipalityName,
+            nameMunicipality: formData.nameMunicipality,
             name: formData.name,
             lastname: formData.lastname,
             email: formData.email,
@@ -204,7 +204,7 @@ const Municipios = () => {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              municipalityName: formData.municipalityName,
+              nameMunicipality: formData.nameMunicipality,
               email: formData.email,
               name: formData.name,
               lastname: formData.lastname,
@@ -282,7 +282,7 @@ const Municipios = () => {
   const municipioFields = [
     {
       label: "Nombre del Municipio",
-      name: "municipalityName",
+      name: "nameMunicipality",
       type: "text",
       placeholder: "Ingrese el nombre del municipio",
     },

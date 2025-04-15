@@ -117,19 +117,23 @@ const Reports = () => {
     { header: "Municipio", accessor: "municipalityName" },
     {
       header: "Evidencias",
-      accessor: "image",
+      accessor: "images",
       cell: (row) =>
-        row.image && row.image.length > 0
-          ? row.image.map((file, idx) => (
+        row.images && row.images.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {row.images.map((image, idx) => (
               <img
                 key={idx}
-                src={file.url}
-                alt="Evidencia"
-                onClick={() => setPreviewImage(file.url)} // Muestra la vista previa al hacer clic
-                className="w-10 h-10 object-cover cursor-pointer mr-2"
+                src={image.url}
+                alt={image.image}
+                className="w-12 h-12 object-cover cursor-pointer rounded-md shadow-md hover:opacity-80"
+                onClick={() => setPreviewImage(image.url)}
               />
-            ))
-          : "Sin evidencias",
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-500 italic">Sin evidencias</span>
+        ),
     },
     {
       header: "Acciones",
