@@ -185,6 +185,9 @@ const Areas = () => {
       return;
     }
 
+    // Agregar el prefijo +52 al número de teléfono
+    const formattedPhone = `+52${formData.phone}`;
+
     try {
       if (modalTitle === "Crear Nueva Área") {
         // Realiza el POST para crear una nueva área
@@ -199,7 +202,7 @@ const Areas = () => {
             name: formData.name,
             lastname: formData.lastname,
             email: formData.email,
-            phone: formData.phone,
+            phone: formattedPhone,
             password: formData.password,
           }),
         });
@@ -222,7 +225,7 @@ const Areas = () => {
             name: formData.name,
             lastname: formData.lastname,
             email: formData.email,
-            phone: formData.phone,
+            phone: formattedPhone,
           },
         ]);
 
@@ -240,7 +243,7 @@ const Areas = () => {
             },
             body: JSON.stringify({
               email: formData.email,
-              phone: formData.phone,
+              phone: formattedPhone,
               uuid: formData.id,
             }),
           }

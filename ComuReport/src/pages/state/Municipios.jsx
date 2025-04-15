@@ -190,6 +190,9 @@ const Municipios = () => {
           return;
         }
 
+        // Agregar el prefijo +52 al número de teléfono
+        const formattedPhone = `+52${formData.phone}`;
+
         const response = await fetch(`${API_BASE_URL}/api/municipality`, {
           method: "POST",
           headers: {
@@ -202,7 +205,7 @@ const Municipios = () => {
             email: formData.email,
             name: formData.name,
             lastname: formData.lastname,
-            phone: formData.phone,
+            phone: formattedPhone,
           }),
         });
 
@@ -247,6 +250,9 @@ const Municipios = () => {
           return;
         }
 
+        // Agregar el prefijo +52 al número de teléfono
+        const formattedPhone = `+52${formData.phone}`;
+
         const response = await fetch(`${API_BASE_URL}/api/municipality`, {
           method: "PUT",
           headers: {
@@ -256,7 +262,7 @@ const Municipios = () => {
           body: JSON.stringify({
             uuid: formData.id,
             email: formData.email,
-            phone: formData.phone,
+            phone: formattedPhone,
           }),
         });
 

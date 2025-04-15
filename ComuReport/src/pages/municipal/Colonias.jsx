@@ -185,6 +185,9 @@ const Colonias = () => {
           return;
         }
 
+        // Agregar el prefijo +52 al número de teléfono
+        const formattedPhone = `+52${formData.phone}`;
+
         // Realiza el POST para crear un nuevo presidente
         const response = await fetch(`${API_BASE_URL}/api/colony`, {
           method: "POST",
@@ -197,7 +200,7 @@ const Colonias = () => {
             name: formData.nombre,
             lastname: formData.apellido,
             email: formData.correo,
-            phone: formData.telefono,
+            phone: formattedPhone,
             password: formData.password,
           }),
         });
@@ -244,6 +247,9 @@ const Colonias = () => {
           return;
         }
 
+        // Agregar el prefijo +52 al número de teléfono
+        const formattedPhone = `+52${formData.phone}`;
+
         // Realiza el PUT para actualizar el contacto
         const response = await fetch(`${API_BASE_URL}/api/colony`, {
           method: "PUT",
@@ -254,7 +260,7 @@ const Colonias = () => {
           body: JSON.stringify({
             uuid: formData.id, // Enviar el UUID del elemento seleccionado
             email: formData.correo,
-            phone: formData.telefono,
+            phone: formattedPhone,
           }),
         });
 
@@ -268,10 +274,10 @@ const Colonias = () => {
           prevData.map((item) =>
             item.id === formData.id
               ? {
-                  ...item,
-                  correo: formData.correo,
-                  telefono: formData.telefono,
-                }
+                ...item,
+                correo: formData.correo,
+                telefono: formData.telefono,
+              }
               : item
           )
         );
