@@ -3,6 +3,7 @@ import Table from "../../components/Table";
 import API_BASE_URL from "../../api_config";
 import Badge from "../../components/Badge";
 import ErrorAlert from "../../components/ErrorAlert";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const StatusArea = () => {
   const [data, setData] = useState([]);
@@ -12,6 +13,7 @@ const StatusArea = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
 
   // Función para mostrar el mensaje de error
   const showError = (message) => {
@@ -25,6 +27,7 @@ const StatusArea = () => {
       console.error("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/report`, {
@@ -57,6 +60,8 @@ const StatusArea = () => {
       setData(formattedData);
     } catch (error) {
       console.error("Error al obtener los problemas:", error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -74,10 +79,11 @@ const StatusArea = () => {
       showError("La descripción de la cancelación es obligatoria.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       const token = localStorage.getItem("token");
-      
+
       const response = await fetch(`${API_BASE_URL}/api/report/cancel`, {
         method: "PUT",
         headers: {
@@ -99,6 +105,8 @@ const StatusArea = () => {
     } catch (error) {
       console.error("Error al cancelar el reporte:", error.message);
       showError("Error al cancelar el reporte.");
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -116,6 +124,7 @@ const StatusArea = () => {
       console.error("La descripción del estatus es obligatoria.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       const token = localStorage.getItem("token");
@@ -139,6 +148,8 @@ const StatusArea = () => {
       fetchProblems();
     } catch (error) {
       console.error("Error al actualizar el problema:", error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -197,6 +208,7 @@ const StatusArea = () => {
 
   return (
     <div className="p-8 bg-transparent">
+      {isLoading && <LoadingScreen />} {/* Muestra la pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Gestión de Problemas del Área</h1>
       </div>

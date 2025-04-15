@@ -6,6 +6,7 @@ import ConfirmAlert from "../../components/ConfirmAlert";
 import Badge from "../../components/Badge";
 import ErrorAlert from "../../components/ErrorAlert";
 import API_BASE_URL from "../../api_config";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const Reports = () => {
   const [data, setData] = useState([]);
@@ -15,6 +16,7 @@ const Reports = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
 
   const columns = [
     { header: "Título", accessor: "title" },
@@ -69,6 +71,7 @@ const Reports = () => {
   };
 
   const fetchReports = async () => {
+    setIsLoading(true); // Muestra la pantalla de carga
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/report`, {
@@ -89,6 +92,8 @@ const Reports = () => {
       setData(reports);
     } catch (error) {
       showError(error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -109,6 +114,7 @@ const Reports = () => {
       setErrorMessage("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     // Validaciones de los campos
     if (!formData.title || formData.title.trim() === "") {
@@ -188,29 +194,29 @@ const Reports = () => {
       setModalOpen(false);
     } catch (error) {
       showError(error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
   return (
     <div className="p-8 bg-transparent">
+      {isLoading && <LoadingScreen />} {/* Pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Reportes</h2>
         <ButtonRegister label="Nuevo Reporte" onClick={handleCreate} />
       </div>
-
       {errorMessage && (
         <ErrorAlert
           message={errorMessage}
           onClose={() => setErrorMessage(null)}
         />
       )}
-
       {successMessage && (
         <div className="bg-green-500 text-white text-center py-2 px-4 mb-4 rounded">
           {successMessage}
         </div>
       )}
-
       {previewImage && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-50"
@@ -223,9 +229,7 @@ const Reports = () => {
           />
         </div>
       )}
-
       <Table columns={columns} data={data} showActions={false} />
-
       {modalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-50 backdrop-blur-sm z-40"

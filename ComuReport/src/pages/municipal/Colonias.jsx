@@ -5,6 +5,7 @@ import ModalForm from "../../components/ModalForm";
 import ConfirmAlert from "../../components/ConfirmAlert";
 import ErrorAlert from "../../components/ErrorAlert";
 import API_BASE_URL from "../../api_config";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const Colonias = () => {
   const [data, setData] = useState([]);
@@ -16,6 +17,7 @@ const Colonias = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showInactive, setShowInactive] = useState(false); // Estado para mostrar/ocultar colonias inactivas
+  const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
 
   // Función para obtener las colonias desde la API
   const fetchColonias = async () => {
@@ -25,6 +27,8 @@ const Colonias = () => {
       console.error("No se encontró un token en localStorage.");
       return;
     }
+
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/colony`, {
@@ -62,6 +66,8 @@ const Colonias = () => {
       setData(formattedData);
     } catch (error) {
       console.error("Error al obtener las colonias:", error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -127,6 +133,8 @@ const Colonias = () => {
       setErrorMessage("No se encontró un token en localStorage.");
       return;
     }
+
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       if (modalTitle === "Crear Nuevo Presidente") {
@@ -276,6 +284,8 @@ const Colonias = () => {
     } catch (error) {
       console.error("Error al procesar la solicitud:", error.message);
       setErrorMessage("Ocurrió un error al procesar la solicitud.");
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -286,6 +296,8 @@ const Colonias = () => {
       console.error("No se encontró un token en localStorage.");
       return;
     }
+
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       console.log(rowToDelete); // Verifica el valor de rowToDelete
@@ -382,6 +394,7 @@ const Colonias = () => {
 
   return (
     <div className="p-8 bg-transparent">
+      {isLoading && <LoadingScreen />} {/* Muestra la pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Gestión de Presidentes</h1>
         <div className="flex space-x-4">
@@ -394,20 +407,17 @@ const Colonias = () => {
           </button>
         </div>
       </div>
-
       {errorMessage && (
         <ErrorAlert
           message={errorMessage}
           onClose={() => setErrorMessage(null)} // Limpia el mensaje de error al cerrar
         />
       )}
-
       {successMessage && (
         <div className="bg-green-500 text-white text-center py-2 px-4 mb-4 rounded">
           {successMessage}
         </div>
       )}
-
       <Table
         columns={columns}
         data={data}
@@ -415,7 +425,6 @@ const Colonias = () => {
         onDelete={handleDelete}
         showActions={!showInactive} // Oculta las acciones si se muestran colonias inactivas
       />
-
       {modalOpen && (
         <ModalForm
           title={modalTitle}
@@ -430,7 +439,6 @@ const Colonias = () => {
           type={modalTitle === "Crear Nuevo Presidente" ? "create" : "edit"}
         />
       )}
-
       {confirmAlertOpen && (
         <ConfirmAlert
           message="El perfil pasara a inactivo, ¿estás seguro de que deseas eliminarlo?"

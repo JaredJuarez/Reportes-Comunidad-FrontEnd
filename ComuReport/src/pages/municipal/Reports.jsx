@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import Badge from "../../components/Badge";
 import API_BASE_URL from "../../api_config";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const Reports = () => {
   const [data, setData] = useState([]);
@@ -12,9 +13,11 @@ const Reports = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null); // Estado para la vista previa de la imagen
+  const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
 
   // Función para obtener los reportes
   const fetchReports = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/report`, {
@@ -35,10 +38,13 @@ const Reports = () => {
       setData(reports);
     } catch (error) {
       setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
   const fetchAreas = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/area`, {
@@ -59,6 +65,8 @@ const Reports = () => {
       setAreas(areasData);
     } catch (error) {
       setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -77,6 +85,7 @@ const Reports = () => {
       setErrorMessage("Por favor, selecciona un área.");
       return;
     }
+    setIsLoading(true);
 
     try {
       const token = localStorage.getItem("token");
@@ -102,6 +111,8 @@ const Reports = () => {
       fetchReports(); // Actualiza la lista de reportes
     } catch (error) {
       setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -117,11 +128,11 @@ const Reports = () => {
     { header: "Municipio", accessor: "municipalityName" },
     {
       header: "Evidencias",
-      accessor: "images",
+      accessor: "image",
       cell: (row) =>
-        row.images && row.images.length > 0 ? (
+        row.image && row.image.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {row.images.map((image, idx) => (
+            {row.image.map((image, idx) => (
               <img
                 key={idx}
                 src={image.url}
@@ -151,6 +162,7 @@ const Reports = () => {
 
   return (
     <div className="p-8 bg-transparent">
+      {isLoading && <LoadingScreen />} {/* Muestra la pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Reportes</h2>
       </div>

@@ -5,6 +5,7 @@ import ModalForm from "../../components/ModalForm";
 import ConfirmAlert from "../../components/ConfirmAlert";
 import ErrorAlert from "../../components/ErrorAlert";
 import API_BASE_URL from "../../api_config";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const Municipios = () => {
   const [data, setData] = useState([]);
@@ -15,6 +16,7 @@ const Municipios = () => {
   const [rowToDelete, setRowToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null); // Estado para manejar el mensaje de error
+  const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
 
   // Función para mostrar el mensaje de error
   const showError = (message) => {
@@ -29,6 +31,7 @@ const Municipios = () => {
       console.error("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/municipality`, {
@@ -60,6 +63,8 @@ const Municipios = () => {
       setData(formattedData);
     } catch (error) {
       console.error("Error al obtener los municipios:", error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -106,6 +111,7 @@ const Municipios = () => {
       showError("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     // Validaciones de los campos
     if (!formData.nameMunicipality || formData.nameMunicipality.trim() === "") {
@@ -231,6 +237,8 @@ const Municipios = () => {
     } catch (error) {
       console.error("Error al crear o actualizar el municipio:", error.message);
       showError("Ocurrió un error al procesar la solicitud.");
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -241,6 +249,7 @@ const Municipios = () => {
       console.error("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       // Realiza el DELETE para eliminar el municipio
@@ -271,6 +280,8 @@ const Municipios = () => {
       setRowToDelete(null); // Limpia la fila seleccionada
     } catch (error) {
       console.error("Error al eliminar el municipio:", error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -320,6 +331,7 @@ const Municipios = () => {
 
   return (
     <div className="p-8 bg-transparent">
+      {isLoading && <LoadingScreen />} {/* Pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Gestión de Municipios</h1>
         <ButtonRegister label="Nuevo Municipio" onClick={handleCreate} />

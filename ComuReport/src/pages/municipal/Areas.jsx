@@ -5,6 +5,7 @@ import ModalForm from "../../components/ModalForm";
 import ConfirmAlert from "../../components/ConfirmAlert";
 import ErrorAlert from "../../components/ErrorAlert";
 import API_BASE_URL from "../../api_config";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const Areas = () => {
   const [data, setData] = useState([]);
@@ -15,6 +16,8 @@ const Areas = () => {
   const [rowToDelete, setRowToDelete] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null); // Estado para manejar el mensaje de error
+  const [showInactive, setShowInactive] = useState(false); // Estado para alternar entre activas e inactivas
+  const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
 
   // Función para mostrar el mensaje de error
   const showError = (message) => {
@@ -28,6 +31,7 @@ const Areas = () => {
       console.error("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/area`, {
@@ -46,25 +50,33 @@ const Areas = () => {
 
       const areas = await response.json();
 
-      // Mapea los datos para adaptarlos al formato esperado por la tabla
-      const formattedData = areas.map((area) => ({
+      // Filtra las áreas según el estado `showInactive`
+      const filteredAreas = areas.filter((area) =>
+        showInactive ? area.status === false : area.status === true
+      );
+
+      // Mapea los datos filtrados para adaptarlos al formato esperado por la tabla
+      const formattedData = filteredAreas.map((area) => ({
         id: area.uuid,
         nameArea: area.nameArea,
         name: area.personBean.name,
         lastname: area.personBean.lastname,
         email: area.personBean.email,
         phone: area.personBean.phone,
+        status: area.status, // Incluye el status para usarlo en la tabla
       }));
 
       setData(formattedData);
     } catch (error) {
       console.error("Error al obtener las áreas:", error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
   useEffect(() => {
-    fetchAreas(); // Llama a la función para obtener las áreas al cargar el componente
-  }, []);
+    fetchAreas(); // Llama a la función para obtener las colonias al cargar el componente
+  }, [showInactive]);
 
   const columns = [
     { header: "Área", accessor: "nameArea" },
@@ -72,11 +84,29 @@ const Areas = () => {
     { header: "Apellido", accessor: "lastname" },
     { header: "Correo", accessor: "email" },
     { header: "Teléfono", accessor: "phone" },
+    {
+      header: "Estado",
+      accessor: "status",
+      cell: (row) =>
+        row.status ? (
+          <span className="text-green-500 font-semibold">Activo</span>
+        ) : (
+          <span className="text-red-500 font-semibold">Inactivo</span>
+        ),
+    },
   ];
+
+  const handleToggleInactive = () => {
+    setShowInactive((prev) => !prev); // Alterna entre mostrar activas e inactivas
+  };
 
   const handleEdit = (row) => {
     setModalTitle("Editar Área");
-    setModalInitialData(row);
+    setModalInitialData({
+      id: row.id,
+      email: row.email,
+      phone: row.phone,
+    });
     setModalOpen(true);
   };
 
@@ -99,13 +129,13 @@ const Areas = () => {
   };
 
   const handleModalSubmit = async (formData) => {
-    console.log("Valor de nameArea:", formData);
     const token = localStorage.getItem("token"); // Obtiene el token del localStorage
 
     if (!token) {
       showError("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     // Validaciones de los campos
     if (!formData.nameArea || formData.nameArea.trim() === "") {
@@ -182,7 +212,6 @@ const Areas = () => {
 
         // Maneja la respuesta como texto si no es JSON
         const result = await response.text();
-        console.log("Respuesta del servidor:", result);
 
         // Actualiza el estado con los datos enviados (si el servidor no devuelve el área creada)
         setData((prevData) => [
@@ -210,12 +239,8 @@ const Areas = () => {
               Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
             },
             body: JSON.stringify({
-              nameArea: formData.nameArea,
-              name: formData.name,
-              lastname: formData.lastname,
               email: formData.email,
               phone: formData.phone,
-              password: formData.password,
               uuid: formData.id,
             }),
           }
@@ -227,18 +252,17 @@ const Areas = () => {
           );
         }
 
-        // Actualiza el estado con los datos editados
-        setData((prevData) =>
-          prevData.map((item) => (item.id === formData.id ? formData : item))
-        );
-
         setSuccessMessage("Área actualizada correctamente.");
-        setTimeout(() => setSuccessMessage(""), 3000); // Limpia el mensaje después de 3 segundos
+        setTimeout(() => setSuccessMessage(""), 3000);
       }
 
-      setModalOpen(false); // Cierra el modal
+      setModalOpen(false);
+      fetchAreas(); // Actualiza la lista de áreas
     } catch (error) {
-      showError(`Error al crear o actualizar el área: ${error.message}`);
+      console.error("Error al procesar la solicitud:", error.message);
+      setErrorMessage("Ocurrió un error al procesar la solicitud.");
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -249,10 +273,9 @@ const Areas = () => {
       console.error("No se encontró un token en localStorage.");
       return;
     }
+    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
-      console.log("ID del área a eliminar:", rowToDelete.id); // Verifica el ID del área a eliminar
-
       // Realiza el DELETE para eliminar el área
       const response = await fetch(`${API_BASE_URL}/api/area`, {
         method: "DELETE",
@@ -282,6 +305,8 @@ const Areas = () => {
       setRowToDelete(null); // Limpia la fila seleccionada
     } catch (error) {
       console.error("Error al eliminar el área:", error.message);
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
     }
   };
 
@@ -290,7 +315,7 @@ const Areas = () => {
     setRowToDelete(null);
   };
 
-  const areaFields = [
+  const areaFieldsCreate = [
     {
       label: "Área",
       name: "nameArea",
@@ -329,47 +354,73 @@ const Areas = () => {
     },
   ];
 
+  const areaFieldsEdit = [
+    {
+      label: "Correo",
+      name: "email",
+      type: "email",
+      placeholder: "Correo de contacto",
+    },
+    {
+      label: "Teléfono",
+      name: "phone",
+      type: "text",
+      placeholder: "Teléfono de contacto",
+    },
+  ];
+
   return (
     <div className="p-8 bg-transparent">
+      {isLoading && <LoadingScreen />} {/* Muestra la pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Gestión de Áreas</h1>
-        <ButtonRegister label="Nueva Área" onClick={handleCreate} />
+        <div className="flex space-x-4">
+          <ButtonRegister label="Nueva Área" onClick={handleCreate} />
+          <button
+            onClick={handleToggleInactive}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            {showInactive ? "Mostrar Activas" : "Mostrar Inactivas"}
+          </button>
+        </div>
       </div>
-
       {errorMessage && (
         <ErrorAlert
           message={errorMessage}
           onClose={() => setErrorMessage(null)} // Limpia el mensaje de error al cerrar
         />
       )}
-
       {successMessage && (
         <div className="bg-green-500 text-white text-center py-2 px-4 mb-4 rounded">
           {successMessage}
         </div>
       )}
-
       <Table
         columns={columns}
         data={data}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        showActions={!showInactive} // Oculta las acciones si se muestran áreas inactivas
       />
-
       {modalOpen && (
         <ModalForm
           title={modalTitle}
-          fields={areaFields}
+          fields={
+            modalTitle === "Crear Nueva Área"
+              ? areaFieldsCreate
+              : areaFieldsEdit
+          }
           initialData={modalInitialData}
           onSubmit={handleModalSubmit}
           onClose={() => setModalOpen(false)}
+          type={modalTitle === "Crear Nueva Área" ? "create" : "edit"}
         />
       )}
       {confirmAlertOpen && (
         <ConfirmAlert
           message="¿Estás seguro de eliminar esta área?"
           onConfirm={handleConfirmDelete}
-          onCancel={handleCancelDelete}
+          onCancel={() => setConfirmAlertOpen(false)}
         />
       )}
     </div>
