@@ -2,20 +2,19 @@ import React, { useState, useEffect } from "react";
 
 const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
   const [formData, setFormData] = useState(initialData || {});
-  const [images, setImages] = useState([]);
+  const [file, setFile] = useState([]); // Cambia el nombre del estado de imágenes
   const [previewImages, setPreviewImages] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null); // Estado para mensajes de error
 
   useEffect(() => {
     setFormData(initialData || {});
-    setImages(initialData && initialData.images ? initialData.images : []);
+    setFile(initialData && initialData.images ? initialData.images : []);
     setPreviewImages([]);
   }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Campo: ${name}, Valor: ${value}`); // Depuración
-    setFormData((prev) => ({ ...prev, [name]: value })); // Asegúrate de que el estado se actualice correctamente
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDrop = (e) => {
@@ -43,7 +42,7 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
         (file.type === "image/jpeg" || file.type === "image/png") &&
         file.size <= 10 * 1024 * 1024
       ) {
-        validFiles.push(file);
+        validFiles.push(file); // Asegúrate de que sean instancias de File
         validPreviews.push(URL.createObjectURL(file)); // Crear URL para previsualización
       } else {
         invalidFileFound = true; // Marca si se encuentra un archivo no válido
@@ -57,12 +56,9 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
       setTimeout(() => setErrorMessage(null), 3000); // Limpia el mensaje después de 3 segundos
     }
 
-    const totalFiles = [...images, ...validFiles];
-    const totalPreviews = [...previewImages, ...validPreviews];
-
-    if (totalFiles.length <= 3) {
-      setImages(totalFiles);
-      setPreviewImages(totalPreviews);
+    if (validFiles.length + file.length <= 3) {
+      setFile((prev) => [...prev, ...validFiles]); // Actualiza el estado `file`
+      setPreviewImages((prev) => [...prev, ...validPreviews]);
     } else {
       setErrorMessage("Solo puedes subir un máximo de 3 imágenes.");
       setTimeout(() => setErrorMessage(null), 3000); // Limpia el mensaje después de 3 segundos
@@ -70,27 +66,19 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose }) => {
   };
 
   const handleRemoveImage = (index) => {
-    const updatedImages = images.filter((_, i) => i !== index);
+    const updatedFiles = file.filter((_, i) => i !== index);
     const updatedPreviews = previewImages.filter((_, i) => i !== index);
-    setImages(updatedImages);
+    setFile(updatedFiles); // Actualiza el estado `file`
     setPreviewImages(updatedPreviews);
   };
 
-    const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-  
-    if (images.length === 0) {
+    if (file.length === 0) {
       onSubmit(formData);
     } else {
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach((key) => {
-        formDataToSend.append(key, formData[key]);
-      });
-      images.forEach((image) => {
-        formDataToSend.append("file", image);
-      });
-  
-      onSubmit(formDataToSend);
+      const { title, description } = formData;
+      onSubmit({ title, description, file });
     }
   };
 

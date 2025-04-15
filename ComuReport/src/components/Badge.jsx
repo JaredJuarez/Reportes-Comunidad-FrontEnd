@@ -4,12 +4,10 @@ import React from 'react';
 const Badge = ({ status }) => {
   let bgColor = '';
   const normalizedStatus = status.toLowerCase();
-  if (normalizedStatus === 'cancelada') {
-    bgColor = 'bg-red-500';
-  } else if (normalizedStatus === 'pendiente') {
-    bgColor = 'bg-yellow-500';
-  } else if (normalizedStatus === 'resuelto') {
+  if (normalizedStatus === 'procesado por municipio') {
     bgColor = 'bg-green-500';
+  } else if (normalizedStatus === 'procesado por area') {
+    bgColor = 'bg-yellow-500';
   } else {
     bgColor = 'bg-gray-500';
   }

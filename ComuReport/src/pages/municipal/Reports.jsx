@@ -139,7 +139,7 @@ const Reports = () => {
           onClick={() => handleEditStatus(row)}
           className="px-4 py-2 bg-[#210d38] text-white rounded hover:bg-[#210d38]/60 cursor-pointer"
         >
-          Modificar Estatus
+          Mandar a área
         </button>
       ),
     },

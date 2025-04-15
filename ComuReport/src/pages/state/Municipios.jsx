@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import Table from '../../components/Table';
-import ButtonRegister from '../../components/ButtonRegister';
-import ModalForm from '../../components/ModalForm';
-import ConfirmAlert from '../../components/ConfirmAlert';
-import ErrorAlert from '../../components/ErrorAlert';
-import API_BASE_URL from '../../api_config';
+import React, { useState, useEffect } from "react";
+import Table from "../../components/Table";
+import ButtonRegister from "../../components/ButtonRegister";
+import ModalForm from "../../components/ModalForm";
+import ConfirmAlert from "../../components/ConfirmAlert";
+import ErrorAlert from "../../components/ErrorAlert";
+import API_BASE_URL from "../../api_config";
 
 const Municipios = () => {
   const [data, setData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
+  const [modalTitle, setModalTitle] = useState("");
   const [modalInitialData, setModalInitialData] = useState(null);
   const [confirmAlertOpen, setConfirmAlertOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null); // Estado para manejar el mensaje de error
 
   // Función para mostrar el mensaje de error
@@ -23,24 +23,26 @@ const Municipios = () => {
 
   // Función para obtener los municipios desde la API
   const fetchMunicipios = async () => {
-    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+    const token = localStorage.getItem("token"); // Obtiene el token del localStorage
 
     if (!token) {
-      console.error('No se encontró un token en localStorage.');
+      console.error("No se encontró un token en localStorage.");
       return;
     }
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/municipality`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
         },
       });
 
       if (!response.ok) {
-        throw new Error('Error al obtener los municipios. Verifica tu conexión o el token.');
+        throw new Error(
+          "Error al obtener los municipios. Verifica tu conexión o el token."
+        );
       }
 
       const municipios = await response.json();
@@ -57,7 +59,7 @@ const Municipios = () => {
 
       setData(formattedData);
     } catch (error) {
-      console.error('Error al obtener los municipios:', error.message);
+      console.error("Error al obtener los municipios:", error.message);
     }
   };
 
@@ -66,29 +68,28 @@ const Municipios = () => {
   }, []);
 
   const columns = [
-    { header: 'Municipio', accessor: 'nameMunicipality' },
-    { header: 'Nombre', accessor: 'name' },
-    { header: 'Apellido', accessor: 'lastname' },
-    { header: 'Correo', accessor: 'email' },
-    { header: 'Teléfono', accessor: 'phone' },
+    { header: "Municipio", accessor: "nameMunicipality" },
+    { header: "Nombre", accessor: "name" },
+    { header: "Apellido", accessor: "lastname" },
+    { header: "Correo", accessor: "email" },
+    { header: "Teléfono", accessor: "phone" },
   ];
 
   const handleCreate = () => {
-    setModalTitle('Crear Nuevo Municipio');
+    setModalTitle("Crear Nuevo Municipio");
     setModalInitialData({
-      id: '',
-      municipalityName: '',
-      name: '',
-      lastname: '',
-      email: '',
-      phone: '',
-      password: '',
+      municipalityName: "",
+      name: "",
+      lastname: "",
+      email: "",
+      phone: "",
+      password: "",
     });
     setModalOpen(true);
   };
 
   const handleEdit = (row) => {
-    setModalTitle('Editar Municipio');
+    setModalTitle("Editar Municipio");
     setModalInitialData(row);
     setModalOpen(true);
   };
@@ -99,68 +100,67 @@ const Municipios = () => {
   };
 
   const handleModalSubmit = async (formData) => {
-    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+    const token = localStorage.getItem("token");
 
     if (!token) {
-      showError('No se encontró un token en localStorage.');
+      showError("No se encontró un token en localStorage.");
       return;
     }
 
     // Validaciones de los campos
-    if (!formData.municipalityName || formData.municipalityName.trim() === '') {
-      showError('El nombre del municipio es obligatorio.');
+    if (!formData.municipalityName || formData.municipalityName.trim() === "") {
+      showError("El nombre del municipio es obligatorio.");
       return;
     }
 
-    if (!formData.name || formData.name.trim() === '') {
-      showError('El nombre del responsable es obligatorio.');
+    if (!formData.name || formData.name.trim() === "") {
+      showError("El nombre del responsable es obligatorio.");
       return;
     }
 
-    if (!formData.lastname || formData.lastname.trim() === '') {
-      showError('El apellido del responsable es obligatorio.');
+    if (!formData.lastname || formData.lastname.trim() === "") {
+      showError("El apellido del responsable es obligatorio.");
       return;
     }
 
-    if (!formData.email || formData.email.trim() === '') {
-      showError('El correo electrónico es obligatorio.');
+    if (!formData.email || formData.email.trim() === "") {
+      showError("El correo electrónico es obligatorio.");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      showError('El correo electrónico no tiene un formato válido.');
+      showError("El correo electrónico no tiene un formato válido.");
       return;
     }
 
-    if (!formData.password || formData.password.trim() === '') {
-      showError('La contraseña es obligatoria.');
+    if (!formData.password || formData.password.trim() === "") {
+      showError("La contraseña es obligatoria.");
       return;
     }
 
-    // Validación de contraseña segura
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(formData.password)) {
       showError(
-        'La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial.'
+        "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial."
       );
       return;
     }
 
     const phoneRegex = /^[0-9]{10}$/;
     if (!formData.phone || !phoneRegex.test(formData.phone)) {
-      showError('El teléfono debe contener 10 dígitos numéricos.');
+      showError("El teléfono debe contener 10 dígitos numéricos.");
       return;
     }
 
     try {
-      if (modalTitle === 'Crear Nuevo Municipio') {
-        // Realiza el POST para crear un nuevo municipio
+      if (modalTitle === "Crear Nuevo Municipio") {
         const response = await fetch(`${API_BASE_URL}/api/municipality`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             municipalityName: formData.municipalityName,
@@ -173,18 +173,17 @@ const Municipios = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Error al crear el municipio. Verifica los datos enviados.');
+          throw new Error(
+            "Error al crear el municipio. Verifica los datos enviados."
+          );
         }
 
-        // Maneja la respuesta como texto si no es JSON
         const result = await response.text();
-        console.log('Respuesta del servidor:', result);
+        console.log("Respuesta del servidor:", result);
 
-        // Actualiza el estado con los datos enviados (si el servidor no devuelve el municipio creado)
         setData((prevData) => [
           ...prevData,
           {
-            id: Date.now(), // Genera un ID temporal
             nameMunicipality: formData.municipalityName,
             name: formData.name,
             lastname: formData.lastname,
@@ -193,77 +192,85 @@ const Municipios = () => {
           },
         ]);
 
-        setSuccessMessage('Municipio agregado correctamente.');
-        setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
-      } else if (modalTitle === 'Editar Municipio') {
-        // Realiza el PUT para actualizar un municipio existente
-        const response = await fetch(`${API_BASE_URL}/api/municipality/${formData.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
-          },
-          body: JSON.stringify({
-            municipalityName: formData.municipalityName,
-            email: formData.email,
-            name: formData.name,
-            lastname: formData.lastname,
-            phone: formData.phone,
-          }),
-        });
+        setSuccessMessage("Municipio agregado correctamente.");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } else if (modalTitle === "Editar Municipio") {
+        const response = await fetch(
+          `${API_BASE_URL}/api/municipality/${formData.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              municipalityName: formData.municipalityName,
+              email: formData.email,
+              name: formData.name,
+              lastname: formData.lastname,
+              phone: formData.phone,
+            }),
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Error al actualizar el municipio. Verifica los datos enviados.');
+          throw new Error(
+            "Error al actualizar el municipio. Verifica los datos enviados."
+          );
         }
 
-        // Actualiza el estado con los datos editados
         setData((prevData) =>
           prevData.map((item) => (item.id === formData.id ? formData : item))
         );
 
-        setSuccessMessage('Municipio actualizado correctamente.');
-        setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+        setSuccessMessage("Municipio actualizado correctamente.");
+        setTimeout(() => setSuccessMessage(""), 3000);
       }
 
-      setModalOpen(false); // Cierra el modal
+      setModalOpen(false); // Cierra el modal solo si no hay errores
     } catch (error) {
-      console.error('Error al crear o actualizar el municipio:', error.message);
+      console.error("Error al crear o actualizar el municipio:", error.message);
+      showError("Ocurrió un error al procesar la solicitud.");
     }
   };
 
   const handleConfirmDelete = async () => {
-    const token = localStorage.getItem('token'); // Obtiene el token del localStorage
+    const token = localStorage.getItem("token"); // Obtiene el token del localStorage
 
     if (!token) {
-      console.error('No se encontró un token en localStorage.');
+      console.error("No se encontró un token en localStorage.");
       return;
     }
 
     try {
       // Realiza el DELETE para eliminar el municipio
       const response = await fetch(`${API_BASE_URL}/api/municipality`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
         },
         body: JSON.stringify({ uuid: rowToDelete.id }), // Envía el UUID en el cuerpo
       });
 
       if (!response.ok) {
-        throw new Error('Error al eliminar el municipio. Verifica tu conexión o el token.');
+        throw new Error(
+          "Error al eliminar el municipio. Verifica tu conexión o el token."
+        );
       }
 
       // Actualiza el estado eliminando el municipio de la lista
-      setData((prevData) => prevData.filter((item) => item.id !== rowToDelete.id));
+      setData((prevData) =>
+        prevData.filter((item) => item.id !== rowToDelete.id)
+      );
 
-      setSuccessMessage('Municipio eliminado correctamente.');
-      setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
+      setSuccessMessage("Municipio eliminado correctamente.");
+      setTimeout(() => setSuccessMessage(""), 3000); // Limpia el mensaje después de 3 segundos
 
       setConfirmAlertOpen(false); // Cierra el modal de confirmación
       setRowToDelete(null); // Limpia la fila seleccionada
     } catch (error) {
-      console.error('Error al eliminar el municipio:', error.message);
+      console.error("Error al eliminar el municipio:", error.message);
     }
   };
 
@@ -273,12 +280,42 @@ const Municipios = () => {
   };
 
   const municipioFields = [
-    { label: 'Nombre del Municipio', name: 'municipalityName', type: 'text', placeholder: 'Ingrese el nombre del municipio' },
-    { label: 'Nombre', name: 'name', type: 'text', placeholder: 'Nombre del responsable' },
-    { label: 'Apellido', name: 'lastname', type: 'text', placeholder: 'Apellido del responsable' },
-    { label: 'Correo', name: 'email', type: 'email', placeholder: 'Correo de contacto' },
-    { label: 'Contraseña', name: 'password', type: 'password', placeholder: 'Ingrese la contraseña' },
-    { label: 'Teléfono', name: 'phone', type: 'text', placeholder: 'Teléfono de contacto' },
+    {
+      label: "Nombre del Municipio",
+      name: "municipalityName",
+      type: "text",
+      placeholder: "Ingrese el nombre del municipio",
+    },
+    {
+      label: "Nombre",
+      name: "name",
+      type: "text",
+      placeholder: "Nombre del responsable",
+    },
+    {
+      label: "Apellido",
+      name: "lastname",
+      type: "text",
+      placeholder: "Apellido del responsable",
+    },
+    {
+      label: "Correo",
+      name: "email",
+      type: "email",
+      placeholder: "Correo de contacto",
+    },
+    {
+      label: "Contraseña",
+      name: "password",
+      type: "password",
+      placeholder: "Ingrese la contraseña",
+    },
+    {
+      label: "Teléfono",
+      name: "phone",
+      type: "text",
+      placeholder: "Teléfono de contacto",
+    },
   ];
 
   return (
@@ -301,7 +338,12 @@ const Municipios = () => {
         </div>
       )}
 
-      <Table columns={columns} data={data} onEdit={handleEdit} onDelete={handleDelete} />
+      <Table
+        columns={columns}
+        data={data}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
       {modalOpen && (
         <ModalForm

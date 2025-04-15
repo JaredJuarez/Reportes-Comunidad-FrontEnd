@@ -216,6 +216,8 @@ const Areas = () => {
               lastname: formData.lastname,
               email: formData.email,
               phone: formData.phone,
+              password: formData.password,
+              uuid: formData.id,
             }),
           }
         );
@@ -250,6 +252,8 @@ const Areas = () => {
     }
 
     try {
+      console.log("ID del área a eliminar:", rowToDelete.id); // Verifica el ID del área a eliminar
+
       // Realiza el DELETE para eliminar el área
       const response = await fetch(`${API_BASE_URL}/api/area`, {
         method: "DELETE",
