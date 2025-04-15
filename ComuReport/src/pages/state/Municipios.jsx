@@ -17,6 +17,7 @@ const Municipios = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null); // Estado para manejar el mensaje de error
   const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
+  const [showInactive, setShowInactive] = useState(false); // Estado para alternar entre activos e inactivos
 
   // Función para mostrar el mensaje de error
   const showError = (message) => {
@@ -50,14 +51,20 @@ const Municipios = () => {
 
       const municipios = await response.json();
 
+      // Filtra los municipios según el estado `showInactive`
+      const filteredMunicipios = municipios.filter((municipio) =>
+        showInactive ? municipio.status === false : municipio.status === true
+      );
+
       // Mapea los datos para adaptarlos al formato esperado por la tabla
-      const formattedData = municipios.map((municipio) => ({
+      const formattedData = filteredMunicipios.map((municipio) => ({
         id: municipio.uuid,
         nameMunicipality: municipio.nameMunicipality,
         name: municipio.personBean.name,
         lastname: municipio.personBean.lastname,
         email: municipio.personBean.email,
         phone: municipio.personBean.phone,
+        status: municipio.status,
       }));
 
       setData(formattedData);
@@ -70,7 +77,7 @@ const Municipios = () => {
 
   useEffect(() => {
     fetchMunicipios(); // Llama a la función para obtener los municipios al cargar el componente
-  }, []);
+  }, [showInactive]);
 
   const columns = [
     { header: "Municipio", accessor: "nameMunicipality" },
@@ -78,7 +85,21 @@ const Municipios = () => {
     { header: "Apellido", accessor: "lastname" },
     { header: "Correo", accessor: "email" },
     { header: "Teléfono", accessor: "phone" },
+    {
+      header: "Estado",
+      accessor: "status",
+      cell: (row) =>
+        row.status ? (
+          <span className="text-green-500 font-semibold">Activo</span>
+        ) : (
+          <span className="text-red-500 font-semibold">Inactivo</span>
+        ),
+    },
   ];
+
+  const handleToggleInactive = () => {
+    setShowInactive((prev) => !prev); // Alterna entre mostrar activos e inactivos
+  };
 
   const handleCreate = () => {
     setModalTitle("Crear Nuevo Municipio");
@@ -95,7 +116,11 @@ const Municipios = () => {
 
   const handleEdit = (row) => {
     setModalTitle("Editar Municipio");
-    setModalInitialData(row);
+    setModalInitialData({
+      id: row.id,
+      email: row.email,
+      phone: row.phone,
+    });
     setModalOpen(true);
   };
 
@@ -113,55 +138,58 @@ const Municipios = () => {
     }
     setIsLoading(true); // Muestra la pantalla de carga
 
-    // Validaciones de los campos
-    if (!formData.nameMunicipality || formData.nameMunicipality.trim() === "") {
-      showError("El nombre del municipio es obligatorio.");
-      return;
-    }
-
-    if (!formData.name || formData.name.trim() === "") {
-      showError("El nombre del responsable es obligatorio.");
-      return;
-    }
-
-    if (!formData.lastname || formData.lastname.trim() === "") {
-      showError("El apellido del responsable es obligatorio.");
-      return;
-    }
-
-    if (!formData.email || formData.email.trim() === "") {
-      showError("El correo electrónico es obligatorio.");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      showError("El correo electrónico no tiene un formato válido.");
-      return;
-    }
-
-    if (!formData.password || formData.password.trim() === "") {
-      showError("La contraseña es obligatoria.");
-      return;
-    }
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-      showError(
-        "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial."
-      );
-      return;
-    }
-
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!formData.phone || !phoneRegex.test(formData.phone)) {
-      showError("El teléfono debe contener 10 dígitos numéricos.");
-      return;
-    }
-
     try {
       if (modalTitle === "Crear Nuevo Municipio") {
+        // Validaciones de los campos
+        if (
+          !formData.nameMunicipality ||
+          formData.nameMunicipality.trim() === ""
+        ) {
+          showError("El nombre del municipio es obligatorio.");
+          return;
+        }
+
+        if (!formData.name || formData.name.trim() === "") {
+          showError("El nombre del responsable es obligatorio.");
+          return;
+        }
+
+        if (!formData.lastname || formData.lastname.trim() === "") {
+          showError("El apellido del responsable es obligatorio.");
+          return;
+        }
+
+        if (!formData.email || formData.email.trim() === "") {
+          showError("El correo electrónico es obligatorio.");
+          return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          showError("El correo electrónico no tiene un formato válido.");
+          return;
+        }
+
+        if (!formData.password || formData.password.trim() === "") {
+          showError("La contraseña es obligatoria.");
+          return;
+        }
+
+        const passwordRegex =
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(formData.password)) {
+          showError(
+            "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial."
+          );
+          return;
+        }
+
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!formData.phone || !phoneRegex.test(formData.phone)) {
+          showError("El teléfono debe contener 10 dígitos numéricos.");
+          return;
+        }
+
         const response = await fetch(`${API_BASE_URL}/api/municipality`, {
           method: "POST",
           headers: {
@@ -201,23 +229,36 @@ const Municipios = () => {
         setSuccessMessage("Municipio agregado correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000);
       } else if (modalTitle === "Editar Municipio") {
-        const response = await fetch(
-          `${API_BASE_URL}/api/municipality/${formData.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              nameMunicipality: formData.nameMunicipality,
-              email: formData.email,
-              name: formData.name,
-              lastname: formData.lastname,
-              phone: formData.phone,
-            }),
-          }
-        );
+        // Validaciones para edición
+        if (!formData.email || formData.email.trim() === "") {
+          showError("El correo electrónico es obligatorio.");
+          return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          showError("El correo electrónico no tiene un formato válido.");
+          return;
+        }
+
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!formData.phone || !phoneRegex.test(formData.phone)) {
+          showError("El teléfono debe contener 10 dígitos numéricos.");
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/municipality`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            uuid: formData.id,
+            email: formData.email,
+            phone: formData.phone,
+          }),
+        });
 
         if (!response.ok) {
           throw new Error(
@@ -234,6 +275,7 @@ const Municipios = () => {
       }
 
       setModalOpen(false); // Cierra el modal solo si no hay errores
+      fetchMunicipios(); // Actualiza la lista de municipios
     } catch (error) {
       console.error("Error al crear o actualizar el municipio:", error.message);
       showError("Ocurrió un error al procesar la solicitud.");
@@ -290,7 +332,7 @@ const Municipios = () => {
     setRowToDelete(null);
   };
 
-  const municipioFields = [
+  const municipioFieldsCreate = [
     {
       label: "Nombre del Municipio",
       name: "nameMunicipality",
@@ -329,47 +371,71 @@ const Municipios = () => {
     },
   ];
 
+  const municipioFieldsEdit = [
+    {
+      label: "Correo",
+      name: "email",
+      type: "email",
+      placeholder: "Correo de contacto",
+    },
+    {
+      label: "Teléfono",
+      name: "phone",
+      type: "text",
+      placeholder: "Teléfono de contacto",
+    },
+  ];
+
   return (
     <div className="p-8 bg-transparent">
       {isLoading && <LoadingScreen />} {/* Pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Gestión de Municipios</h1>
-        <ButtonRegister label="Nuevo Municipio" onClick={handleCreate} />
+        <div className="flex space-x-4">
+          <ButtonRegister label="Nuevo Municipio" onClick={handleCreate} />
+          <button
+            onClick={handleToggleInactive}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+          >
+            {showInactive ? "Mostrar Activos" : "Mostrar Inactivos"}
+          </button>
+        </div>
       </div>
-
       {errorMessage && (
         <ErrorAlert
           message={errorMessage}
           onClose={() => setErrorMessage(null)} // Limpia el mensaje de error al cerrar
         />
       )}
-
       {successMessage && (
         <div className="bg-green-500 text-white text-center py-2 px-4 mb-4 rounded">
           {successMessage}
         </div>
       )}
-
       <Table
         columns={columns}
         data={data}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        showActions={!showInactive} // Oculta las acciones si se muestran municipios inactivos
       />
-
       {modalOpen && (
         <ModalForm
           title={modalTitle}
-          fields={municipioFields}
+          fields={
+            modalTitle === "Crear Nuevo Municipio"
+              ? municipioFieldsCreate
+              : municipioFieldsEdit
+          }
           initialData={modalInitialData}
           onSubmit={handleModalSubmit}
           onClose={() => setModalOpen(false)}
+          type={modalTitle === "Crear Nuevo Municipio" ? "create" : "edit"}
         />
       )}
-
       {confirmAlertOpen && (
         <ConfirmAlert
-          message="¿Estás seguro de eliminar este municipio?"
+          message="El perfil pasara a inactivo, ¿estás seguro de que deseas eliminarlo?"
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
         />

@@ -153,7 +153,7 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose ,type }) => {
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(idx)}
-                            className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                            className="cursor-pointer absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
                           >
                             &times;
                           </button>
@@ -212,13 +212,13 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose ,type }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              className="cursor-pointer px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              className="cursor-pointer px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
               Guardar
             </button>
