@@ -191,19 +191,23 @@ const Colonias = () => {
         setSuccessMessage('Colonia agregada correctamente.');
         setTimeout(() => setSuccessMessage(''), 3000); // Limpia el mensaje después de 3 segundos
       } else if (modalTitle === 'Editar Colonia') {
+        console.log('Editando colonia:', formData); // Verifica los datos que se envían para editar
+        
         // Realiza el PUT para actualizar una colonia existente
-        const response = await fetch(`${API_BASE_URL}/api/colony/${formData.id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/colony`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
           },
           body: JSON.stringify({
+            uuid: formData.id,
             colonyName: formData.colonia,
             name: formData.nombre,
             lastname: formData.apellido,
             email: formData.correo,
             phone: formData.telefono,
+            password: formData.password,
           }),
         });
 
@@ -235,6 +239,8 @@ const Colonias = () => {
     }
 
     try {
+      console.log(rowToDelete); // Verifica el valor de rowToDelete
+      
       // Realiza el DELETE para eliminar la colonia
       const response = await fetch(`${API_BASE_URL}/api/colony`, {
         method: 'DELETE',

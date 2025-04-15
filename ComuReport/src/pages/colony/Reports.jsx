@@ -22,7 +22,17 @@ const Reports = () => {
     {
       header: "Estado",
       accessor: "status",
-      cell: (row) => <Badge status={row.status} />,
+      cell: (row) => {
+        let badgeColor = "bg-gray-500"; // Default color
+        if (row.status === "Procesado por Municipio") {
+          badgeColor = "bg-blue-500";
+        } else if (row.status === "Procesado por Area") {
+          badgeColor = "bg-green-500";
+        } else {
+          badgeColor = "bg-red-500";
+        }
+        return <Badge status={row.status} className={badgeColor} />;
+      },
     },
     { header: "Colonia", accessor: "colonyName" },
     { header: "Municipio", accessor: "municipalityName" },
@@ -84,11 +94,11 @@ const Reports = () => {
 
   const handleCreate = () => {
     setModalTitle("Crear Nuevo Reporte");
-    setModalInitialData({ title: "", description: "", file: [] });
+    setModalInitialData({ title: "", description: "" });
     setModalOpen(true);
   };
 
-  const handleModalSubmit = async (formDataToSend) => {
+  const handleModalSubmit = async (formData) => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -97,60 +107,69 @@ const Reports = () => {
     }
 
     // Validaciones de los campos
-    if (
-      !formDataToSend.get("title") ||
-      formDataToSend.get("title").trim() === ""
-    ) {
+    if (!formData.title || formData.title.trim() === "") {
       setErrorMessage("El título del reporte es obligatorio.");
       return;
     }
 
-    if (
-      !formDataToSend.get("description") ||
-      formDataToSend.get("description").trim() === ""
-    ) {
+    if (!formData.description || formData.description.trim() === "") {
       setErrorMessage("La descripción del reporte es obligatoria.");
       return;
     }
 
-    // Validación de longitud de caracteres
-    if (formDataToSend.get("title").length > 100) {
+    if (formData.title.length > 100) {
       setErrorMessage("El título no puede exceder los 100 caracteres.");
       return;
     }
 
-    if (formDataToSend.get("description").length > 500) {
+    if (formData.description.length > 500) {
       setErrorMessage("La descripción no puede exceder los 500 caracteres.");
       return;
     }
 
-    // Validación de imágenes
-    const files = formDataToSend.getAll("file");
-    if (!files || files.length === 1) {
-      setErrorMessage("Debes subir al menos una imagen.");
-      return;
-    }
-
-    if (files.length > 3) {
+    if (formData.file.length > 3) {
       setErrorMessage("Solo puedes subir un máximo de 3 imágenes.");
       return;
     }
 
-    for (const file of files) {
+    if (formData.file.length == 0) {
+      setErrorMessage("Debes agregar por lo menos una imagen.");
+      return;
+    }
+
+    for (const file of formData.file) {
       if (file.size > 10 * 1024 * 1024) {
         setErrorMessage("Cada imagen debe pesar menos de 10 MB.");
         return;
       }
     }
 
+    // Construir el FormData
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("description", formData.description);
+
+    // Agregar cada archivo bajo la misma clave "file"
+    formData.file.forEach((file) => {
+      formDataToSend.append("file", file); // Todos los archivos bajo la clave "file"
+    });
+
+    // Verificar el contenido del FormData
+    for (let pair of formDataToSend.entries()) {
+      console.log(pair[0] + ": ", pair[1]);
+    }
+
+    formData.file.forEach((file) => {
+      console.log(file instanceof File); // Debería imprimir "true" para cada archivo
+    });
+
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/report`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // Asegúrate de que el token esté en el formato correcto
+          Authorization: `Bearer ${token}`,
         },
-        body: formDataToSend, // Enviar el FormData directamente
+        body: formDataToSend,
       });
 
       if (!response.ok) {
