@@ -80,7 +80,7 @@ const Sidebar = ({ dashboardType }) => {
       <div className="p-4">
         <button
           onClick={handleLogout}
-          className="flex items-center p-2 hover:bg-gray-700 rounded w-full text-left"
+          className="flex items-center p-2 hover:bg-gray-700 rounded w-full text-left cursor-pointer"
         >
           <FaSignOutAlt className="text-xl" />
           {isExpanded && <span className="ml-4">Cerrar Sesión</span>}

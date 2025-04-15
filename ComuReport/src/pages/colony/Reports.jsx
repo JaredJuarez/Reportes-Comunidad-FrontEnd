@@ -17,6 +17,7 @@ const Reports = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // Estado para la pantalla de carga
+  const [isHistoryView, setIsHistoryView] = useState(false);
 
   const columns = [
     { header: "Título", accessor: "title" },
@@ -95,6 +96,44 @@ const Reports = () => {
     } finally {
       setIsLoading(false); // Oculta la pantalla de carga
     }
+  };
+
+  // Función para obtener el historial de reportes
+  const fetchReportHistory = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/api/report/history`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          "Error al obtener el historial de reportes. Verifica tu conexión o el token."
+        );
+      }
+
+      const history = await response.json();
+      setData(history);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Alternar entre reportes actuales e historial
+  const toggleView = () => {
+    if (isHistoryView) {
+      fetchReports(); // Cargar reportes actuales
+    } else {
+      fetchReportHistory(); // Cargar historial
+    }
+    setIsHistoryView((prev) => !prev);
   };
 
   useEffect(() => {
@@ -203,8 +242,18 @@ const Reports = () => {
     <div className="p-8 bg-transparent">
       {isLoading && <LoadingScreen />} {/* Pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Reportes</h2>
-        <ButtonRegister label="Nuevo Reporte" onClick={handleCreate} />
+        <h2 className="text-xl font-semibold">
+          {isHistoryView ? "Historial de Reportes" : "Reportes Actuales"}
+        </h2>
+        <div className="flex gap-4">
+          <ButtonRegister label="Nuevo Reporte" onClick={handleCreate} />
+          <button
+            onClick={toggleView}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+          >
+            {isHistoryView ? "Ver Reportes Actuales" : "Ver Historial"}
+          </button>
+        </div>
       </div>
       {errorMessage && (
         <ErrorAlert
