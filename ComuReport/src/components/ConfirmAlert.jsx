@@ -2,9 +2,19 @@
 import React from 'react';
 
 const ConfirmAlert = ({ message, onConfirm, onCancel }) => {
+  const handleOutsideClick = (e) => {
+    if (e.target.id === 'confirm-alert-overlay') {
+      onCancel();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent backdrop-blur-sm bg-opacity-50 fade-in">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
+    <div
+      id="confirm-alert-overlay"
+      className="fixed inset-0 flex items-center justify-center z-50 bg-transparent backdrop-blur-sm bg-opacity-50 fade-in"
+      onClick={handleOutsideClick}
+    >
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-lg font-bold mb-4">{message}</h3>
         <div className="flex justify-end space-x-2">
           <button
