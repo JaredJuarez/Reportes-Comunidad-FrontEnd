@@ -229,8 +229,8 @@ const Reports = () => {
       }
 
       showSuccess("Reporte registrado correctamente.");
-      fetchReports();
       setModalOpen(false);
+      setTimeout(() => fetchReports(), 1000); 
     } catch (error) {
       showError(error.message);
     } finally {

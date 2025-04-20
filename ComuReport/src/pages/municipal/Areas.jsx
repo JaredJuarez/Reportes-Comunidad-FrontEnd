@@ -231,6 +231,7 @@ const Areas = () => {
 
         setSuccessMessage("Área agregada correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000); // Limpia el mensaje después de 3 segundos
+        setTimeout(() => fetchAreas(), 1000);
       } else if (modalTitle === "Editar Área") {
         // Realiza el PUT para actualizar un área existente
         const response = await fetch(
@@ -278,7 +279,7 @@ const Areas = () => {
     }
     setIsLoading(true); // Muestra la pantalla de carga
     console.log("UUID a eliminar:", rowToDelete.id); // Verifica el UUID que se va a eliminar
-    
+
     try {
       // Realiza el DELETE para eliminar el área
       const response = await fetch(`${API_BASE_URL}/api/area`, {
@@ -314,9 +315,117 @@ const Areas = () => {
     }
   };
 
-  const handleCancelDelete = () => {
-    setConfirmAlertOpen(false);
-    setRowToDelete(null);
+  const handleTransfer = (row) => {
+    setModalTitle("Transferir Responsable de Área");
+    setModalInitialData({
+      uuid: row.id,
+      areaName: row.nameArea,
+      name: "",
+      lastname: "",
+      email: "",
+      phone: "",
+      password: "",
+    });
+    setModalOpen(true);
+  };
+
+  const handleTransferSubmit = async (formData) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showError("No se encontró un token en localStorage.");
+      return;
+    }
+
+    setIsLoading(true); // Muestra la pantalla de carga
+
+    try {
+      // Validaciones de los campos
+      if (!formData.name || formData.name.trim() === "") {
+        showError("El nombre del responsable es obligatorio.");
+        return;
+      }
+
+      if (!formData.lastname || formData.lastname.trim() === "") {
+        showError("El apellido del responsable es obligatorio.");
+        return;
+      }
+
+      if (!formData.email || formData.email.trim() === "") {
+        showError("El correo electrónico es obligatorio.");
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        showError("El correo electrónico no tiene un formato válido.");
+        return;
+      }
+
+      if (!formData.password || formData.password.trim() === "") {
+        showError("La contraseña es obligatoria.");
+        return;
+      }
+
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        showError(
+          "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial."
+        );
+        return;
+      }
+
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!formData.phone || !phoneRegex.test(formData.phone)) {
+        showError("El teléfono debe contener 10 dígitos numéricos.");
+        return;
+      }
+
+      const formattedPhone = `+52${formData.phone}`; // Con prefijo
+
+      const response = await fetch(`${API_BASE_URL}/api/area/transfer`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          uuid: formData.uuid,
+          nameArea: formData.areaName,
+          password: formData.password,
+          email: formData.email,
+          name: formData.name,
+          lastname: formData.lastname,
+          phone: formattedPhone,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        console.error("Detalles del error:", errorDetails);
+        throw new Error(
+          "Error al transferir el responsable del área. Verifica los datos."
+        );
+      }
+
+      setSuccessMessage(
+        "Transferencia realizada correctamente. La cuenta actual será bloqueada y cerrará sesión."
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      setModalOpen(false); // Cierra el modal
+      fetchAreas(); // Actualiza la lista de áreas
+      setIsLoading(false); // Oculta la pantalla de carga
+    } catch (error) {
+      console.error(
+        "Error al transferir el responsable del área:",
+        error.message
+      );
+      showError("Ocurrió un error al procesar la transferencia.");
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
+    }
   };
 
   const areaFieldsCreate = [
@@ -404,6 +513,7 @@ const Areas = () => {
         data={data}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onTransfer={handleTransfer} // Agrega esta línea
         showActions={!showInactive} // Oculta las acciones si se muestran áreas inactivas
       />
       {modalOpen && (
@@ -412,12 +522,57 @@ const Areas = () => {
           fields={
             modalTitle === "Crear Nueva Área"
               ? areaFieldsCreate
+              : modalTitle === "Transferir Responsable de Área"
+              ? [
+                  {
+                    label: "Nombre",
+                    name: "name",
+                    type: "text",
+                    placeholder: "Nombre del responsable",
+                  },
+                  {
+                    label: "Apellido",
+                    name: "lastname",
+                    type: "text",
+                    placeholder: "Apellido del responsable",
+                  },
+                  {
+                    label: "Correo",
+                    name: "email",
+                    type: "email",
+                    placeholder: "Correo de contacto",
+                  },
+                  {
+                    label: "Contraseña",
+                    name: "password",
+                    type: "password",
+                    placeholder: "Ingrese la contraseña",
+                  },
+                  {
+                    label: "Teléfono",
+                    name: "phone",
+                    type: "text",
+                    placeholder: "Teléfono de contacto",
+                  },
+                ]
               : areaFieldsEdit
           }
           initialData={modalInitialData}
-          onSubmit={handleModalSubmit}
+          onSubmit={
+            modalTitle === "Crear Nueva Área"
+              ? handleModalSubmit
+              : modalTitle === "Transferir Responsable de Área"
+              ? handleTransferSubmit
+              : handleModalSubmit
+          }
           onClose={() => setModalOpen(false)}
-          type={modalTitle === "Crear Nueva Área" ? "create" : "edit"}
+          type={
+            modalTitle === "Crear Nueva Área"
+              ? "create"
+              : modalTitle === "Transferir Responsable de Área"
+              ? "transfer"
+              : "edit"
+          }
         />
       )}
       {confirmAlertOpen && (

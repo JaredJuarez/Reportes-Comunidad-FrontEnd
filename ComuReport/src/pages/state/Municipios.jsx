@@ -361,6 +361,7 @@ const Municipios = () => {
 
         setSuccessMessage("Municipio agregado correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000);
+        setTimeout(() => fetchMunicipios(), 1000);
       } else if (modalTitle === "Editar Municipio") {
         // Validaciones para edición
         if (!formData.email || formData.email.trim() === "") {

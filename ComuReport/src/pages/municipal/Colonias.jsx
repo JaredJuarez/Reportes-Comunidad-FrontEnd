@@ -229,6 +229,7 @@ const Colonias = () => {
 
         setSuccessMessage("Colonia agregada correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000);
+        setTimeout(() => fetchColonias(), 1000);
       } else if (modalTitle === "Editar Contacto") {
         // Validaciones para edición
         if (!formData.correo || formData.correo.trim() === "") {
@@ -275,10 +276,10 @@ const Colonias = () => {
           prevData.map((item) =>
             item.id === formData.id
               ? {
-                ...item,
-                correo: formData.correo,
-                telefono: formData.telefono,
-              }
+                  ...item,
+                  correo: formData.correo,
+                  telefono: formData.telefono,
+                }
               : item
           )
         );
@@ -329,12 +330,12 @@ const Colonias = () => {
       setData((prevData) =>
         prevData.filter((item) => item.id !== rowToDelete.id)
       );
-
       setSuccessMessage("Colonia eliminada correctamente.");
       setTimeout(() => setSuccessMessage(""), 3000); // Limpia el mensaje después de 3 segundos
-
+      
       setConfirmAlertOpen(false); // Cierra el modal de confirmación
       setRowToDelete(null); // Limpia la fila seleccionada
+      setIsLoading(false); // Oculta la pantalla de carga
     } catch (error) {
       console.error("Error al eliminar la colonia:", error.message);
     }
@@ -343,6 +344,114 @@ const Colonias = () => {
   const handleCancelDelete = () => {
     setConfirmAlertOpen(false);
     setRowToDelete(null);
+  };
+
+  const handleTransfer = (row) => {
+    setModalTitle("Transferir Presidente");
+    setModalInitialData({
+      uuid: row.id,
+      colonyName: row.colonia,
+      name: "",
+      lastname: "",
+      correo: "",
+      telefono: "",
+      password: "",
+    });
+    setModalOpen(true);
+  };
+
+  const handleTransferSubmit = async (formData) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setErrorMessage("No se encontró un token en localStorage.");
+      return;
+    }
+
+    setIsLoading(true); // Muestra la pantalla de carga
+
+    try {
+      // Validaciones de los campos
+      if (!formData.name || formData.name.trim() === "") {
+        setErrorMessage("El nombre del responsable es obligatorio.");
+        return;
+      }
+
+      if (!formData.lastname || formData.lastname.trim() === "") {
+        setErrorMessage("El apellido del responsable es obligatorio.");
+        return;
+      }
+
+      if (!formData.correo || formData.correo.trim() === "") {
+        setErrorMessage("El correo electrónico es obligatorio.");
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.correo)) {
+        setErrorMessage("El correo electrónico no tiene un formato válido.");
+        return;
+      }
+
+      if (!formData.password || formData.password.trim() === "") {
+        setErrorMessage("La contraseña es obligatoria.");
+        return;
+      }
+
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        setErrorMessage(
+          "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial."
+        );
+        return;
+      }
+
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!formData.telefono || !phoneRegex.test(formData.telefono)) {
+        setErrorMessage("El teléfono debe contener 10 dígitos numéricos.");
+        return;
+      }
+
+      const formattedPhone = `+52${formData.telefono}`;
+
+      const response = await fetch(`${API_BASE_URL}/api/colony/transfer`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          uuid: formData.uuid,
+          colonyName: formData.colonyName,
+          password: formData.password,
+          email: formData.correo,
+          name: formData.name,
+          lastname: formData.lastname,
+          phone: formattedPhone,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        console.error("Detalles del error:", errorDetails);
+        throw new Error(
+          "Error al transferir el presidente. Verifica los datos."
+        );
+      }
+
+      setSuccessMessage(
+        "Transferencia realizada correctamente. La cuenta actual será bloqueada y cerrará sesión."
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+      setModalOpen(false); // Cierra el modal
+      fetchColonias();
+    } catch (error) {
+      console.error("Error al transferir el presidente:", error.message);
+      setErrorMessage("Ocurrió un error al procesar la transferencia.");
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
+    }
   };
 
   const coloniaFieldsCreate = [
@@ -430,6 +539,7 @@ const Colonias = () => {
         data={data}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onTransfer={handleTransfer} // Agrega esta línea
         showActions={!showInactive} // Oculta las acciones si se muestran colonias inactivas
       />
       {modalOpen && (
@@ -438,12 +548,57 @@ const Colonias = () => {
           fields={
             modalTitle === "Crear Nuevo Presidente"
               ? coloniaFieldsCreate
+              : modalTitle === "Transferir Presidente"
+              ? [
+                  {
+                    label: "Nombre",
+                    name: "name",
+                    type: "text",
+                    placeholder: "Nombre del responsable",
+                  },
+                  {
+                    label: "Apellido",
+                    name: "lastname",
+                    type: "text",
+                    placeholder: "Apellido del responsable",
+                  },
+                  {
+                    label: "Correo",
+                    name: "correo",
+                    type: "email",
+                    placeholder: "Correo de contacto",
+                  },
+                  {
+                    label: "Contraseña",
+                    name: "password",
+                    type: "password",
+                    placeholder: "Ingrese la contraseña",
+                  },
+                  {
+                    label: "Teléfono",
+                    name: "telefono",
+                    type: "text",
+                    placeholder: "Teléfono de contacto",
+                  },
+                ]
               : coloniaFieldsEdit
           }
           initialData={modalInitialData}
-          onSubmit={handleModalSubmit}
+          onSubmit={
+            modalTitle === "Crear Nuevo Presidente"
+              ? handleModalSubmit
+              : modalTitle === "Transferir Presidente"
+              ? handleTransferSubmit
+              : handleModalSubmit
+          }
           onClose={() => setModalOpen(false)}
-          type={modalTitle === "Crear Nuevo Presidente" ? "create" : "edit"}
+          type={
+            modalTitle === "Crear Nuevo Presidente"
+              ? "create"
+              : modalTitle === "Transferir Presidente"
+              ? "transfer"
+              : "edit"
+          }
         />
       )}
       {confirmAlertOpen && (
