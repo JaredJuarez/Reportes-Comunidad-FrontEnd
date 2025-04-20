@@ -1,7 +1,14 @@
 import React from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaExchangeAlt } from "react-icons/fa";
 
-const Table = ({ columns, data, onEdit, onDelete, showActions = true }) => {
+const Table = ({
+  columns,
+  data,
+  onEdit,
+  onDelete,
+  onTransfer,
+  showActions = true,
+}) => {
   return (
     <div className="overflow-x-auto rounded-lg shadow border border-purple-200">
       <div className="max-h-[70vh] overflow-y-auto">
@@ -47,6 +54,14 @@ const Table = ({ columns, data, onEdit, onDelete, showActions = true }) => {
                         className="text-red-500 hover:text-red-700 cursor-pointer"
                       >
                         <FaTrash />
+                      </button>
+                    )}
+                    {onTransfer && (
+                      <button
+                        onClick={() => onTransfer(row)}
+                        className="text-blue-500 hover:text-blue-700 cursor-pointer"
+                      >
+                        <FaExchangeAlt />
                       </button>
                     )}
                   </td>

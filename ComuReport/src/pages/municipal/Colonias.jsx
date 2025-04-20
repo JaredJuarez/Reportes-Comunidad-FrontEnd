@@ -46,6 +46,7 @@ const Colonias = () => {
       }
 
       const colonias = await response.json();
+      console.log("Colonias obtenidas:", colonias); // Verifica la respuesta de la API
 
       // Filtra las colonias según el estado `showInactive`
       const filteredColonias = colonias.filter((colonia) =>
@@ -186,7 +187,7 @@ const Colonias = () => {
         }
 
         // Agregar el prefijo +52 al número de teléfono
-        const formattedPhone = `+52${formData.phone}`;
+        const formattedPhone = `+52${formData.telefono}`;
 
         // Realiza el POST para crear un nuevo presidente
         const response = await fetch(`${API_BASE_URL}/api/colony`, {
@@ -248,7 +249,7 @@ const Colonias = () => {
         }
 
         // Agregar el prefijo +52 al número de teléfono
-        const formattedPhone = `+52${formData.phone}`;
+        const formattedPhone = `+52${formData.telefono}`;
 
         // Realiza el PUT para actualizar el contacto
         const response = await fetch(`${API_BASE_URL}/api/colony`, {

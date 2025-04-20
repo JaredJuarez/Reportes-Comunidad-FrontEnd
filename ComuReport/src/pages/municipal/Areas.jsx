@@ -277,7 +277,8 @@ const Areas = () => {
       return;
     }
     setIsLoading(true); // Muestra la pantalla de carga
-
+    console.log("UUID a eliminar:", rowToDelete.id); // Verifica el UUID que se va a eliminar
+    
     try {
       // Realiza el DELETE para eliminar el área
       const response = await fetch(`${API_BASE_URL}/api/area`, {

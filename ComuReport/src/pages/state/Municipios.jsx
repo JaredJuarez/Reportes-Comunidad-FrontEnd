@@ -129,6 +129,136 @@ const Municipios = () => {
     setConfirmAlertOpen(true);
   };
 
+  const handleTransfer = (row) => {
+    setModalTitle("Transferir Municipio");
+    setModalInitialData({
+      uuid: row.id,
+      municipalityName: row.nameMunicipality,
+      name: "",
+      lastname: "",
+      email: "",
+      phone: "",
+      password: "",
+    });
+    setModalOpen(true);
+  };
+
+  const handleTransferSubmit = async (formData) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showError("No se encontró un token en localStorage.");
+      return;
+    }
+
+    setIsLoading(true); // Muestra la pantalla de carga
+
+    try {
+      // Validaciones de los campos
+      if (!formData.name || formData.name.trim() === "") {
+        showError("El nombre del responsable es obligatorio.");
+        return;
+      }
+
+      if (!formData.lastname || formData.lastname.trim() === "") {
+        showError("El apellido del responsable es obligatorio.");
+        return;
+      }
+
+      if (!formData.email || formData.email.trim() === "") {
+        showError("El correo electrónico es obligatorio.");
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        showError("El correo electrónico no tiene un formato válido.");
+        return;
+      }
+
+      if (!formData.password || formData.password.trim() === "") {
+        showError("La contraseña es obligatoria.");
+        return;
+      }
+
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        showError(
+          "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial."
+        );
+        return;
+      }
+
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!formData.phone || !phoneRegex.test(formData.phone)) {
+        showError("El teléfono debe contener 10 dígitos numéricos.");
+        return;
+      }
+
+      // Agregar el prefijo +52 al número de teléfono
+      const formattedPhone = `${formData.phone}`;
+
+      console.log("Datos enviados:", {
+        uuid: formData.uuid,
+        municipalityName: formData.municipalityName,
+        password: formData.password,
+        email: formData.email,
+        name: formData.name,
+        lastname: formData.lastname,
+        phone: formattedPhone,
+      });
+      
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/municipality/transfer`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            uuid: formData.uuid,
+            nameMunicipality: formData.municipalityName,
+            password: formData.password,
+            email: formData.email,
+            name: formData.name,
+            lastname: formData.lastname,
+            phone: formattedPhone,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Error en la respuesta:", response.statusText);
+        const errorText = await response.text();
+        console.error("Texto de error:", errorText);
+        showError("Error al transferir el municipio. Verifica los datos.");
+        throw new Error(
+          "Error al transferir el municipio. Verifica los datos enviados."
+        );
+      }
+
+      setSuccessMessage(
+        "Transferencia realizada correctamente. La cuenta actual será bloqueada y cerrará sesión."
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+
+      setModalOpen(false); // Cierra el modal
+      fetchMunicipios(); // Actualiza la lista de municipios
+      setTimeout(() => {
+        localStorage.clear(); // Borra todo el localStorage
+        window.location.href = "/"; // Redirige a la página principal
+      }, 3000); // Cierra sesión después de 3 segundos
+    } catch (error) {
+      console.error("Error al transferir el municipio:", error.message);
+      showError("Ocurrió un error al procesar la transferencia.");
+    } finally {
+      setIsLoading(false); // Oculta la pantalla de carga
+    }
+  };
+
   const handleModalSubmit = async (formData) => {
     const token = localStorage.getItem("token");
 
@@ -423,6 +553,7 @@ const Municipios = () => {
         data={data}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onTransfer={handleTransfer} // No se usa en este caso
         showActions={!showInactive} // Oculta las acciones si se muestran municipios inactivos
       />
       {modalOpen && (
@@ -431,13 +562,59 @@ const Municipios = () => {
           fields={
             modalTitle === "Crear Nuevo Municipio"
               ? municipioFieldsCreate
+              : modalTitle === "Transferir Municipio"
+              ? [
+                  {
+                    label: "Nombre",
+                    name: "name",
+                    type: "text",
+                    placeholder: "Nombre del responsable",
+                  },
+                  {
+                    label: "Apellido",
+                    name: "lastname",
+                    type: "text",
+                    placeholder: "Apellido del responsable",
+                  },
+                  {
+                    label: "Correo",
+                    name: "email",
+                    type: "email",
+                    placeholder: "Correo de contacto",
+                  },
+                  {
+                    label: "Contraseña",
+                    name: "password",
+                    type: "password",
+                    placeholder: "Ingrese la contraseña",
+                  },
+                  {
+                    label: "Teléfono",
+                    name: "phone",
+                    type: "text",
+                    placeholder: "Teléfono de contacto",
+                  },
+                ]
               : municipioFieldsEdit
           }
           initialData={modalInitialData}
-          onSubmit={handleModalSubmit}
+          onSubmit={
+            modalTitle === "Crear Nuevo Municipio"
+              ? handleModalSubmit
+              : modalTitle === "Transferir Municipio"
+              ? handleTransferSubmit
+              : handleModalSubmit
+          }
           onClose={() => setModalOpen(false)}
-          type={modalTitle === "Crear Nuevo Municipio" ? "create" : "edit"}
-        />
+          type={
+            modalTitle === "Crear Nuevo Municipio"
+              ? "create"
+              : modalTitle === "Transferir Municipio"
+              ? "transfer"
+              : "edit"
+          }
+        >
+        </ModalForm>
       )}
       {confirmAlertOpen && (
         <ConfirmAlert

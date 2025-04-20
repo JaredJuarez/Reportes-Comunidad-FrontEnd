@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const ModalForm = ({ title, fields, initialData, onSubmit, onClose ,type }) => {
+const ModalForm = ({ title, fields, initialData, onSubmit, onClose, type }) => {
   const [formData, setFormData] = useState(initialData || {});
   const [file, setFile] = useState([]); // Cambia el nombre del estado de imágenes
   const [previewImages, setPreviewImages] = useState([]);
@@ -111,6 +111,14 @@ const ModalForm = ({ title, fields, initialData, onSubmit, onClose ,type }) => {
           <p className="text-sm text-gray-500 mb-4">
             Después de crear el presidente, solo se podrán modificar los datos
             de contacto como el correo y el teléfono.
+          </p>
+        )}
+        {type === "transfer" && (
+          <p className="text-sm text-gray-500 mb-4">
+            <strong>Nota importante:</strong> Al transferir este municipio, la
+            cuenta actual será bloqueada y se cerrará la sesión automáticamente.
+            Asegúrate de que los datos ingresados para la nueva cuenta sean
+            correctos.
           </p>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
