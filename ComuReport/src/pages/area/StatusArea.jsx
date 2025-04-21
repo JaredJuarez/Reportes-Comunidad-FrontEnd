@@ -4,7 +4,6 @@ import API_BASE_URL from "../../api_config";
 import Badge from "../../components/Badge";
 import ErrorAlert from "../../components/ErrorAlert";
 import LoadingScreen from "../../components/LoadingScreen";
-import ReusableModal from "../../components/ReusableModal";
 
 const StatusArea = () => {
   const [data, setData] = useState([]);
@@ -221,14 +220,14 @@ const StatusArea = () => {
 
   return (
     <div className="p-8 bg-transparent">
-      {isLoading && <LoadingScreen />}
+      {isLoading && <LoadingScreen />} {/* Muestra la pantalla de carga */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Gestión de Problemas del Área</h1>
       </div>
       {errorMessage && (
         <ErrorAlert
           message={errorMessage}
-          onClose={() => setErrorMessage(null)}
+          onClose={() => setErrorMessage(null)} // Limpia el mensaje de error al cerrar
         />
       )}
       <Table columns={columns} data={data} showActions={false} />
@@ -244,28 +243,99 @@ const StatusArea = () => {
           />
         </div>
       )}
-      <ReusableModal
-        isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        title="Confirmar Actualización de Estado"
-        description="Descripción del estatus"
-        value={statusDescription}
-        onChange={(e) => setStatusDescription(e.target.value)}
-        onConfirm={handleConfirmSend}
-        confirmLabel="Confirmar"
-        cancelLabel="Cancelar"
-      />
-      <ReusableModal
-        isOpen={cancelModalOpen}
-        onClose={() => setCancelModalOpen(false)}
-        title="Confirmar Cancelación del Reporte"
-        description="Descripción de la cancelación"
-        value={statusDescription}
-        onChange={(e) => setStatusDescription(e.target.value)}
-        onConfirm={handleConfirmCancel}
-        confirmLabel="Confirmar"
-        cancelLabel="Cancelar"
-      />
+      {confirmOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-40"
+          aria-hidden="true" // Oculta este contenedor de los lectores de pantalla
+        >
+          <img
+            src="path/to/decorative-image.png" // Ruta de la imagen decorativa
+            alt="" // Indica que la imagen es puramente decorativa
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+            role="dialog" // Indica que este contenedor es un modal
+            tabIndex={-1} // Permite que el modal sea enfocado con el teclado
+            onClick={(e) => e.stopPropagation()} // Evita que el clic cierre el modal al interactuar con su contenido
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setConfirmOpen(false); // Cierra el modal si se presiona la tecla Escape
+              }
+            }}
+          >
+            <h3 id="modal-title" className="text-lg font-semibold mb-4">
+              Confirmar Actualización de Estado
+            </h3>
+            <label className="block text-gray-700 mb-2">
+              Descripción del estatus
+            </label>
+            <textarea
+              value={statusDescription}
+              onChange={(e) => setStatusDescription(e.target.value)}
+              className="w-full border border-gray-300 p-2 rounded mb-4"
+              placeholder="Ingresa la descripción del estatus"
+              aria-label="Descripción del estatus"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 cursor-pointer"
+                aria-label="Cancelar"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                onClick={handleConfirmSend}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 cursor-pointer"
+                aria-label="Confirmar"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {cancelModalOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-40"
+          onClick={() => setCancelModalOpen(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-4">
+              Confirmar Cancelación del Reporte
+            </h3>
+            <label className="block text-gray-700 mb-2">
+              Descripción de la cancelación
+            </label>
+            <textarea
+              value={statusDescription}
+              onChange={(e) => setStatusDescription(e.target.value)}
+              className="w-full border border-gray-300 p-2 rounded mb-4"
+              placeholder="Ingresa la descripción de la cancelación"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setCancelModalOpen(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmCancel}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
