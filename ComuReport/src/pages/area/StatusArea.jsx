@@ -246,14 +246,12 @@ const StatusArea = () => {
       {confirmOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-40"
-          role="presentation" // Indica que este contenedor es solo decorativo
           aria-hidden="true" // Oculta este contenedor de los lectores de pantalla
         >
-          <button
-            type="button"
-            className="absolute inset-0 w-full h-full bg-transparent"
-            onClick={() => setConfirmOpen(false)} // Cierra el modal al hacer clic fuera
-            aria-label="Cerrar modal" // Proporciona una etiqueta accesible
+          <img
+            src="path/to/decorative-image.png" // Ruta de la imagen decorativa
+            alt="" // Indica que la imagen es puramente decorativa
+            className="absolute inset-0 w-full h-full object-cover"
           />
           <div
             className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
