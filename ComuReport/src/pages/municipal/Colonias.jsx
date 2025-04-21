@@ -113,11 +113,12 @@ const Colonias = () => {
   };
 
   const handleEdit = (row) => {
+    const phoneWithoutCountryCode = row.telefono.slice(-10);
     setModalTitle("Editar Contacto");
     setModalInitialData({
       id: row.id,
       correo: row.correo,
-      telefono: row.telefono,
+      telefono: phoneWithoutCountryCode,
     });
     setModalOpen(true);
   };
@@ -286,6 +287,7 @@ const Colonias = () => {
 
         setSuccessMessage("Contacto actualizado correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000);
+        setTimeout(() => fetchColonias(), 1000);
       }
 
       setModalOpen(false); // Cierra el modal

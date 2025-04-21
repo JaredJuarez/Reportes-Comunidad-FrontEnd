@@ -115,11 +115,12 @@ const Municipios = () => {
   };
 
   const handleEdit = (row) => {
+    const phoneWithoutCountryCode = row.phone.slice(-10);
     setModalTitle("Editar Municipio");
     setModalInitialData({
       id: row.id,
       email: row.email,
-      phone: row.phone,
+      phone: phoneWithoutCountryCode,
     });
     setModalOpen(true);
   };
@@ -410,10 +411,10 @@ const Municipios = () => {
 
         setSuccessMessage("Municipio actualizado correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000);
+        setTimeout(() => fetchMunicipios(), 1000);
       }
 
       setModalOpen(false); // Cierra el modal solo si no hay errores
-      fetchMunicipios(); // Actualiza la lista de municipios
     } catch (error) {
       console.error("Error al crear o actualizar el municipio:", error.message);
       showError("Ocurrió un error al procesar la solicitud.");

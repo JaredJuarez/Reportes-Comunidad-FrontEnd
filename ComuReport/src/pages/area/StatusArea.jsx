@@ -125,7 +125,8 @@ const StatusArea = () => {
       return;
     }
     setIsLoading(true); // Muestra la pantalla de carga
-
+    console.log("Confirmando envío del reporte:", selectedReport.id);
+    
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/report`, {
@@ -161,7 +162,11 @@ const StatusArea = () => {
       accessor: "status",
       cell: (row) => <Badge status={row.status} />,
     },
-    { header: "Fecha", accessor: "date" },
+    {
+      header: "Fecha",
+      accessor: "date",
+      cell: (row) => formatDate(row.date), // Formatear la fecha
+    },
     { header: "Colonia", accessor: "colonyName" },
     { header: "Municipio", accessor: "municipalityName" },
     {
@@ -205,6 +210,15 @@ const StatusArea = () => {
       ),
     },
   ];
+
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear()}`;
+  };
 
   return (
     <div className="p-8 bg-transparent">

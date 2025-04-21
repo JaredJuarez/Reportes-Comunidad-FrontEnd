@@ -62,7 +62,8 @@ const Reports = () => {
       }
 
       const areasData = await response.json();
-      setAreas(areasData);
+      const activeAreas = areasData.filter((area) => area.status === true); // Filtrar áreas activas
+      setAreas(activeAreas);
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -118,7 +119,11 @@ const Reports = () => {
 
   const columns = [
     { header: "Título", accessor: "title" },
-    { header: "Fecha", accessor: "date" },
+    {
+      header: "Fecha",
+      accessor: "date",
+      cell: (row) => formatDate(row.date), // Formatear la fecha
+    },
     {
       header: "Estado",
       accessor: "status",
@@ -159,6 +164,15 @@ const Reports = () => {
       ),
     },
   ];
+
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear()}`;
+  };
 
   return (
     <div className="p-8 bg-transparent">

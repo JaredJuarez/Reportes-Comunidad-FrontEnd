@@ -21,7 +21,11 @@ const Reports = () => {
 
   const columns = [
     { header: "Título", accessor: "title" },
-    { header: "Fecha", accessor: "date" },
+    {
+      header: "Fecha",
+      accessor: "date",
+      cell: (row) => formatDate(row.date), // Formatear la fecha
+    },
     {
       header: "Estado",
       accessor: "status",
@@ -60,6 +64,15 @@ const Reports = () => {
         ),
     },
   ];
+
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear()}`;
+  };
 
   const showError = (message) => {
     setErrorMessage(message);
@@ -204,15 +217,6 @@ const Reports = () => {
       formDataToSend.append("file", file); // Todos los archivos bajo la clave "file"
     });
 
-    // Verificar el contenido del FormData
-    for (let pair of formDataToSend.entries()) {
-      console.log(pair[0] + ": ", pair[1]);
-    }
-
-    formData.file.forEach((file) => {
-      console.log(file instanceof File); // Debería imprimir "true" para cada archivo
-    });
-
     try {
       const response = await fetch(`${API_BASE_URL}/api/report`, {
         method: "POST",
@@ -231,7 +235,7 @@ const Reports = () => {
 
       showSuccess("Reporte registrado correctamente.");
       setModalOpen(false);
-      setTimeout(() => fetchReports(), 1000); 
+      setTimeout(() => fetchReports(), 1000);
     } catch (error) {
       showError(error.message);
     } finally {

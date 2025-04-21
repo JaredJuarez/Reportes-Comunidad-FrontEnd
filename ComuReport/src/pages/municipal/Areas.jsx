@@ -101,11 +101,12 @@ const Areas = () => {
   };
 
   const handleEdit = (row) => {
+    const phoneWithoutCountryCode = row.phone.slice(-10);
     setModalTitle("Editar Área");
     setModalInitialData({
       id: row.id,
       email: row.email,
-      phone: row.phone,
+      phone: phoneWithoutCountryCode,
     });
     setModalOpen(true);
   };
@@ -136,22 +137,7 @@ const Areas = () => {
       return;
     }
 
-    // Validaciones de los campos
-    if (!formData.nameArea || formData.nameArea.trim() === "") {
-      showError("El nombre del área es obligatorio.");
-      return;
-    }
-
-    if (!formData.name || formData.name.trim() === "") {
-      showError("El nombre del responsable es obligatorio.");
-      return;
-    }
-
-    if (!formData.lastname || formData.lastname.trim() === "") {
-      showError("El apellido del responsable es obligatorio.");
-      return;
-    }
-
+    // Validaciones comunes
     if (!formData.email || formData.email.trim() === "") {
       showError("El correo electrónico es obligatorio.");
       return;
@@ -160,21 +146,6 @@ const Areas = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       showError("El correo electrónico no tiene un formato válido.");
-      return;
-    }
-
-    if (!formData.password || formData.password.trim() === "") {
-      showError("La contraseña es obligatoria.");
-      return;
-    }
-
-    // Validación de contraseña segura
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-      showError(
-        "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial."
-      );
       return;
     }
 
@@ -189,6 +160,8 @@ const Areas = () => {
 
     // Agregar el prefijo +52 al número de teléfono
     const formattedPhone = `+52${formData.phone}`;
+    console.log("Formatted Phone:", formattedPhone); // Verifica el número de teléfono formateado
+    
 
     try {
       if (modalTitle === "Crear Nueva Área") {
@@ -197,7 +170,7 @@ const Areas = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             nameArea: formData.nameArea,
@@ -216,17 +189,17 @@ const Areas = () => {
         }
 
         setSuccessMessage("Área agregada correctamente.");
-        setTimeout(() => setSuccessMessage(""), 3000); // Limpia el mensaje después de 3 segundos
-        setTimeout(() => fetchAreas(), 1000);
+        setTimeout(() => setSuccessMessage(""), 3000);
+        setTimeout(() => fetchAreas(), 1000); // Actualiza la lista de áreas
       } else if (modalTitle === "Editar Área") {
         // Realiza el PUT para actualizar un área existente
         const response = await fetch(
-          `${API_BASE_URL}/api/area/${formData.id}`,
+          `${API_BASE_URL}/api/area`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // Agrega el token en el encabezado
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               email: formData.email,
@@ -244,13 +217,15 @@ const Areas = () => {
 
         setSuccessMessage("Área actualizada correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000);
+
+        // Llama a fetchAreas para obtener los datos actualizados
+        await fetchAreas();
       }
 
-      setModalOpen(false);
-      fetchAreas(); // Actualiza la lista de áreas
+      setModalOpen(false); // Cierra el modal
     } catch (error) {
       console.error("Error al procesar la solicitud:", error.message);
-      setErrorMessage("Ocurrió un error al procesar la solicitud.");
+      showError("Ocurrió un error al procesar la solicitud.");
     } finally {
       setIsLoading(false); // Oculta la pantalla de carga
     }
@@ -264,7 +239,6 @@ const Areas = () => {
       return;
     }
     setIsLoading(true); // Muestra la pantalla de carga
-    console.log("UUID a eliminar:", rowToDelete.id); // Verifica el UUID que se va a eliminar
 
     try {
       // Realiza el DELETE para eliminar el área
