@@ -125,7 +125,7 @@ const StatusArea = () => {
     }
     setIsLoading(true); // Muestra la pantalla de carga
     console.log("Confirmando envío del reporte:", selectedReport.id);
-    
+
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/report`, {
@@ -246,13 +246,17 @@ const StatusArea = () => {
       {confirmOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-40"
+          role="dialog" // Agrega el rol de diálogo
+          aria-modal="true" // Indica que es un modal
+          aria-labelledby="modal-title" // Asocia el título del modal
           onClick={() => setConfirmOpen(false)}
         >
           <div
             className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()} // Evita que el clic cierre el modal al interactuar con su contenido
+            tabIndex={-1} // Permite que el modal sea enfocado
           >
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 id="modal-title" className="text-lg font-semibold mb-4">
               Confirmar Actualización de Estado
             </h3>
             <label className="block text-gray-700 mb-2">
@@ -263,17 +267,20 @@ const StatusArea = () => {
               onChange={(e) => setStatusDescription(e.target.value)}
               className="w-full border border-gray-300 p-2 rounded mb-4"
               placeholder="Ingresa la descripción del estatus"
+              aria-label="Descripción del estatus" // Agrega una etiqueta accesible
             />
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setConfirmOpen(false)}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 cursor-pointer"
+                aria-label="Cancelar" // Etiqueta accesible para el botón
               >
                 Cancelar
               </button>
               <button
                 onClick={handleConfirmSend}
                 className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 cursor-pointer"
+                aria-label="Confirmar" // Etiqueta accesible para el botón
               >
                 Confirmar
               </button>
