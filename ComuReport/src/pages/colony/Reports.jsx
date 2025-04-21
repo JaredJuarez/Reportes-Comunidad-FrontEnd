@@ -153,7 +153,6 @@ const Reports = () => {
       setErrorMessage("No se encontró un token en localStorage.");
       return;
     }
-    setIsLoading(true); // Muestra la pantalla de carga
 
     // Validaciones de los campos
     if (!formData.title || formData.title.trim() === "") {
@@ -192,6 +191,8 @@ const Reports = () => {
         return;
       }
     }
+
+    setIsLoading(true);
 
     // Construir el FormData
     const formDataToSend = new FormData();

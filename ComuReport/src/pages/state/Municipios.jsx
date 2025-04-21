@@ -266,7 +266,6 @@ const Municipios = () => {
       showError("No se encontró un token en localStorage.");
       return;
     }
-    setIsLoading(true); // Muestra la pantalla de carga
 
     try {
       if (modalTitle === "Crear Nuevo Municipio") {
@@ -319,6 +318,8 @@ const Municipios = () => {
           showError("El teléfono debe contener 10 dígitos numéricos.");
           return;
         }
+
+        setIsLoading(true);
 
         // Agregar el prefijo +52 al número de teléfono
         const formattedPhone = `+52${formData.phone}`;

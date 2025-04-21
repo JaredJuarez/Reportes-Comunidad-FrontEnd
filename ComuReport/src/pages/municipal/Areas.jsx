@@ -135,7 +135,6 @@ const Areas = () => {
       showError("No se encontró un token en localStorage.");
       return;
     }
-    setIsLoading(true); // Muestra la pantalla de carga
 
     // Validaciones de los campos
     if (!formData.nameArea || formData.nameArea.trim() === "") {
@@ -185,6 +184,9 @@ const Areas = () => {
       return;
     }
 
+    // Si todas las validaciones pasan, activa la pantalla de carga
+    setIsLoading(true);
+
     // Agregar el prefijo +52 al número de teléfono
     const formattedPhone = `+52${formData.phone}`;
 
@@ -212,22 +214,6 @@ const Areas = () => {
             "Error al crear el área. Verifica los datos enviados."
           );
         }
-
-        // Maneja la respuesta como texto si no es JSON
-        const result = await response.text();
-
-        // Actualiza el estado con los datos enviados (si el servidor no devuelve el área creada)
-        setData((prevData) => [
-          ...prevData,
-          {
-            id: Date.now(), // Genera un ID temporal
-            nameArea: formData.nameArea,
-            name: formData.name,
-            lastname: formData.lastname,
-            email: formData.email,
-            phone: formattedPhone,
-          },
-        ]);
 
         setSuccessMessage("Área agregada correctamente.");
         setTimeout(() => setSuccessMessage(""), 3000); // Limpia el mensaje después de 3 segundos

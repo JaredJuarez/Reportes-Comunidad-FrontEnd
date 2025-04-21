@@ -135,8 +135,6 @@ const Colonias = () => {
       return;
     }
 
-    setIsLoading(true); // Muestra la pantalla de carga
-
     try {
       if (modalTitle === "Crear Nuevo Presidente") {
         // Validaciones para creación
@@ -185,6 +183,8 @@ const Colonias = () => {
           setErrorMessage("El teléfono debe contener 10 dígitos numéricos.");
           return;
         }
+
+        setIsLoading(true);
 
         // Agregar el prefijo +52 al número de teléfono
         const formattedPhone = `+52${formData.telefono}`;
