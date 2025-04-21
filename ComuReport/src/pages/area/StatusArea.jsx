@@ -256,7 +256,7 @@ const StatusArea = () => {
           <div
             className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
             role="dialog" // Indica que este contenedor es un modal
-            tabIndex={0} // Permite que el modal sea enfocado con el teclado
+            tabIndex={-1} // Permite que el modal sea enfocado con el teclado
             onClick={(e) => e.stopPropagation()} // Evita que el clic cierre el modal al interactuar con su contenido
             onKeyDown={(e) => {
               if (e.key === "Escape") {
