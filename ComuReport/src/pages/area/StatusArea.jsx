@@ -49,7 +49,6 @@ const StatusArea = () => {
       const formattedData = problems.map((problem) => ({
         id: problem.uuid,
         title: problem.title,
-        description: problem.description || "Sin descripción",
         status: problem.status,
         date: problem.date,
         colonyName: problem.colonyName,
@@ -156,7 +155,6 @@ const StatusArea = () => {
 
   const columns = [
     { header: "Título", accessor: "title" },
-    { header: "Descripción", accessor: "description" },
     {
       header: "Estado",
       accessor: "status",
