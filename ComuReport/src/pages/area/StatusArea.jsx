@@ -246,7 +246,7 @@ const StatusArea = () => {
       {confirmOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-sm z-40"
-          onClick={() => setConfirmOpen(false)}
+          onClick={() => setConfirmOpen(false)} role="button"
         >
           <div
             className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
