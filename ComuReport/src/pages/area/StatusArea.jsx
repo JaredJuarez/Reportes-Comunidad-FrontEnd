@@ -256,13 +256,7 @@ const StatusArea = () => {
           <div
             className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
             onClick={(e) => e.stopPropagation()} // Evita que el clic cierre el modal al interactuar con su contenido
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                setConfirmOpen(false); // Cierra el modal si se presiona la tecla Escape
-              }
-            }}
-            role="dialog" // Indica que este contenedor es un modal
-            tabIndex={0} // Permite que el modal sea enfocado con el teclado
+            tabIndex={-1} // Permite que el modal sea enfocado
           >
             <h3 id="modal-title" className="text-lg font-semibold mb-4">
               Confirmar Actualización de Estado
